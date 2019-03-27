@@ -12,7 +12,6 @@
 
 
 
-
 //NotFastEnuf dynamic angle mode test settings 
 
 // Leveling algorithm coefficients for small errors  (normal flying)
