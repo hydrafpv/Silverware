@@ -7,7 +7,9 @@
 #include "defines.h"
 #include "util.h"
 
-
+#if defined (USE_BEESIGN)
+#include "stick_command.h"
+#endif
 // sbus input ( pin SWCLK after calibration) 
 // WILL DISABLE PROGRAMMING AFTER GYRO CALIBRATION - 2 - 3 seconds after powerup)
 
@@ -17,7 +19,9 @@
 #define SERIAL_BAUDRATE 100000
 
 // sbus is normally inverted
-#define SBUS_INVERT 1
+#define SBUS_INVERT_DEFAULT 1
+
+uint8_t sbus_invert = SBUS_INVERT_DEFAULT;
 
 // global use rx variables
 extern float rx[4];
@@ -30,7 +34,7 @@ extern char aux_analogchange[AUXNUMBER];
 int failsafe = 0;
 int rxmode = 0;
 int rx_ready = 0;
-
+int rx_rssi = 0;
 
 // internal sbus variables
 #define RX_BUFF_SIZE 64							//SPEK_FRAME_SIZE 16  
@@ -39,36 +43,36 @@ uint8_t rx_start = 0;
 uint8_t rx_end = 0;
 uint16_t rx_time[RX_BUFF_SIZE];			//????
 
-int framestarted = -1;
+int8_t framestarted = -1;
 uint8_t framestart = 0;
 
 
 unsigned long time_lastrx;
 unsigned long time_siglost;
 uint8_t last_rx_end = 0;
-int last_byte = 0;
+uint8_t last_byte = 0;
 unsigned long time_lastframe;
-int frame_received = 0;
-int rx_state = 0;
-int bind_safety = 0;
+int8_t frame_received = 0;
+int8_t rx_state = 0;
+int8_t bind_safety = 0;
 uint8_t data[25];
 int channels[9];
 
-int failsafe_sbus_failsafe = 0;   
-int failsafe_siglost = 0; 
-int failsafe_noframes = 0;
+int8_t failsafe_sbus_failsafe = 0;   
+int8_t failsafe_siglost = 0; 
+int8_t failsafe_noframes = 0;
 
 // enable statistics
 const int sbus_stats = 0;
 
 // statistics
-int stat_framestartcount;
-int stat_timing_fail;
-int stat_garbage;
+// int stat_framestartcount;
+// int stat_timing_fail;
+//int stat_garbage;
 //int stat_timing[25];
-int stat_frames_accepted = 0;
+// int stat_frames_accepted = 0;
 int stat_frames_second;
-int stat_overflow;
+//int stat_overflow;
 
 
 void USART1_IRQHandler(void)
@@ -96,7 +100,7 @@ void USART1_IRQHandler(void)
       // overflow means something was lost 
       rx_time[rx_end]= 0xFFFe;
       USART_ClearFlag( USART1 , USART_FLAG_ORE );
-      if ( sbus_stats ) stat_overflow++;
+      //if ( sbus_stats ) stat_overflow++;
     }    
         
     rx_end++;
@@ -134,11 +138,11 @@ void sbus_init(void)
 
     USART_Init(USART1, &USART_InitStructure);
 // swap rx/tx pins
-#ifndef Alienwhoop_ZERO
+#ifndef USART1_DONT_SWAP
     USART_SWAPPinCmd( USART1, ENABLE);
 #endif
 // invert signal ( default sbus )
-   if (SBUS_INVERT) USART_InvPinCmd(USART1, USART_InvPin_Rx|USART_InvPin_Tx , ENABLE );
+   if (sbus_invert) USART_InvPinCmd(USART1, USART_InvPin_Rx|USART_InvPin_Tx , ENABLE );
 
 
     USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
@@ -178,13 +182,13 @@ if ( framestarted == 0)
                 // start detected
                 framestart = rx_start;
                 framestarted = 1;  
-                stat_framestartcount++; 
+                // stat_framestartcount++; 
             break;                
             }         
     rx_start++;
     rx_start%=(RX_BUFF_SIZE);
             
-    stat_garbage++;
+   // stat_garbage++;
     }
             
 }
@@ -236,7 +240,7 @@ else if ( framestarted == 1)
       }
       
            
-   }else if (sbus_stats) stat_timing_fail++; 
+   }//else if (sbus_stats)  stat_timing_fail++; 
     
    last_byte = data[24];
 
@@ -257,7 +261,7 @@ else
       
 if ( frame_received )
 {
-   int channels[9];
+   // int channels[9];
    //decode frame    
    channels[0]  = ((data[1]|data[2]<< 8) & 0x07FF);
    channels[1]  = ((data[2]>>3|data[3]<<5) & 0x07FF);
@@ -276,7 +280,7 @@ if ( frame_received )
      failsafe = 1;
      rxmode = RXMODE_BIND; 
      // if throttle < 10%   
-     if (  channels[2] < 336 ) frame_count++;
+     if (  channels[2] < 1100 ) frame_count++;  // Throttle value < 1100 can unlock
      if (frame_count  > 130 )
      {
          if( stat_frames_second > 30 )
@@ -297,13 +301,13 @@ if ( frame_received )
       // normal rx mode
         
       // AETR channel order
-        channels[0] -= 993;           
-        channels[1] -= 993;
-        channels[3] -= 993;      
+        // channels[0] -= 993;           
+        // channels[1] -= 993;
+        // channels[3] -= 993;      
         
-        rx[0] = channels[0];  
-        rx[1] = channels[1]; 
-        rx[2] = channels[3];  
+        rx[0] = channels[0] - 993;  
+        rx[1] = channels[1] - 993; 
+        rx[2] = channels[3] - 993;  
       
         for ( int i = 0 ; i < 3 ; i++)
         {
@@ -315,12 +319,36 @@ if ( frame_received )
         
         if ( rx[3] > 1 ) rx[3] = 1;
 				
+#if defined (USE_BEESIGN)			
+			aux[0] = (channels[4] > 1400) ? 2 :(channels[4] > 700) ? 1 : 0;
+		    aux[1] = (channels[5] > 1400) ? 2 :(channels[5] > 700) ? 1 : 0;
+		    aux[2] = (channels[6] > 1400) ? 2 :(channels[6] > 700) ? 1 : 0;
+		    aux[3] = (channels[7] > 1400) ? 2 :(channels[7] > 700) ? 1 : 0;
+#else 
+            aux[CHAN_5] = (channels[4] > 993) ? 1 : 0;
+		    aux[CHAN_6] = (channels[5] > 993) ? 1 : 0;
+		    aux[CHAN_7] = (channels[6] > 993) ? 1 : 0;
+		    aux[CHAN_8] = (channels[7] > 993) ? 1 : 0;
+			aux[CHAN_9] = (channels[8] > 993) ? 1 : 0;
+#endif
+            rx_rssi = channels[8];
+
+
+                            #ifdef USE_BEESIGN
+                            if (getAuxCommand(rcCmdLevel)){
+                                if (getAuxCommand(rcCmdRace) && !getAuxCommand(rcCmdHorizon)) {
+                            #else
 							if (aux[LEVELMODE]){
 								if (aux[RACEMODE] && !aux[HORIZON]){
+                            #endif // #ifdef USE_BEESIGN
 									if ( ANGLE_EXPO_ROLL > 0.01) rx[0] = rcexpo(rx[0], ANGLE_EXPO_ROLL);
 									if ( ACRO_EXPO_PITCH > 0.01) rx[1] = rcexpo(rx[1], ACRO_EXPO_PITCH);
 									if ( ANGLE_EXPO_YAW > 0.01) rx[2] = rcexpo(rx[2], ANGLE_EXPO_YAW);
+							#ifdef USE_BEESIGN
+                                }else if (getAuxCommand(rcCmdHorizon)) {
+                            #else
 								}else if (aux[HORIZON]){
+                            #endif // #ifdef USE_BEESIGN
 									if ( ANGLE_EXPO_ROLL > 0.01) rx[0] = rcexpo(rx[0], ACRO_EXPO_ROLL);
 									if ( ACRO_EXPO_PITCH > 0.01) rx[1] = rcexpo(rx[1], ACRO_EXPO_PITCH);
 									if ( ANGLE_EXPO_YAW > 0.01) rx[2] = rcexpo(rx[2], ANGLE_EXPO_YAW);
@@ -362,7 +390,7 @@ if ( frame_received )
 #endif
         
         time_lastframe = gettime(); 
-        if (sbus_stats) stat_frames_accepted++;
+        //if (sbus_stats) stat_frames_accepted++;
 				if (bind_safety > 9){								//requires 10 good frames to come in before rx_ready safety can be toggled to 1
 				rx_ready = 1;											// because aux channels initialize low and clear the binding while armed flag before aux updates high
 				bind_safety = 10;}								
@@ -392,7 +420,9 @@ if ( gettime() - time_lastframe > 1000000 )
 
 // add the 3 failsafes together
     failsafe = failsafe_noframes || failsafe_siglost || failsafe_sbus_failsafe;
-
+    if (failsafe) {
+        rx_rssi = 0;
+    }
 }
 
 #endif
