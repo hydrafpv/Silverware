@@ -3,6 +3,11 @@
 #include "drv_fmc.h"
 #include "defines.h"
 
+#if defined(USE_BEESIGN)
+#include "beesign.h"
+#include "stick_command.h"
+#endif
+
 extern int fmc_erase( void );
 extern void fmc_unlock(void);
 extern void fmc_lock(void);
@@ -131,6 +136,49 @@ if ( rx_bind_enable ){
 	}
 #endif
 
+
+#if defined(USE_BEESIGN)
+    unsigned long beesign_temp;
+    beesign_temp = bsDevice.blankFlg;
+    beesign_temp <<= 8;
+    beesign_temp <<= 8;
+    beesign_temp |= bsDevice.vtx.channel;
+    beesign_temp <<= 8;
+    beesign_temp |= bsDevice.vtx.power;
+    writeword(57, beesign_temp);
+    beesign_temp = bsDevice.osd.voltagePosition;
+    beesign_temp <<= 8;
+    beesign_temp |= bsDevice.osd.rssiPosition;
+    beesign_temp <<= 8;
+    beesign_temp |= bsDevice.osd.namePosition;
+    writeword(58, beesign_temp);
+    beesign_temp = bsDevice.others.name[0];
+    beesign_temp <<= 8;
+    beesign_temp |= bsDevice.others.name[1];
+    beesign_temp <<= 8;
+    beesign_temp |= bsDevice.others.name[2];
+    beesign_temp <<= 8;
+    beesign_temp |= bsDevice.others.name[3];
+    writeword(59, beesign_temp);
+    beesign_temp = bsDevice.others.name[4];
+    beesign_temp <<= 8;
+    beesign_temp |= bsDevice.others.name[5];
+    beesign_temp <<= 8;
+    beesign_temp |= bsDevice.others.name[6];
+    beesign_temp <<= 8;
+    beesign_temp |= bsDevice.others.name[7];
+    writeword(60, beesign_temp);
+    beesign_temp = rcCmdArm;
+    beesign_temp <<= 8;
+    beesign_temp |= rcCmdAlti;
+    beesign_temp <<= 8;
+    beesign_temp |= rcCmdLevel;
+    beesign_temp <<= 8;
+    beesign_temp |= rcCmdRace;
+    writeword(61, beesign_temp);
+    beesign_temp = rcCmdHorizon;
+    writeword(62, beesign_temp);
+#endif
     writeword(255, FMC_HEADER);
     
 	fmc_lock();
@@ -141,7 +189,7 @@ if ( rx_bind_enable ){
 void flash_load( void) {
 
 	unsigned long addresscount = 0;
-// check if saved data is present
+// check if saved datav is present
     if (FMC_HEADER == fmc_read(addresscount++)&& FMC_HEADER == fmc_read(255))
     {
 
@@ -222,6 +270,35 @@ extern int rx_bind_enable;
 #if defined(RX_DSMX_2048) || defined(RX_DSM2_1024)
 	extern int rx_bind_enable;
 	rx_bind_enable = fmc_read_float(56);
+#endif
+
+#if defined(USE_BEESIGN)
+    unsigned long beesign_temp;
+    beesign_temp = fmc_read(57);
+    bsDevice.blankFlg = beesign_temp >> 24;
+    bsDevice.vtx.channel = beesign_temp >> 8;
+    bsDevice.vtx.power = beesign_temp;
+    beesign_temp = fmc_read(58);
+    bsDevice.osd.voltagePosition = beesign_temp >> 16;
+    bsDevice.osd.rssiPosition = beesign_temp >> 8;
+    bsDevice.osd.namePosition = beesign_temp;
+    beesign_temp = fmc_read(59);
+    bsDevice.others.name[0] = beesign_temp >> 24;
+    bsDevice.others.name[1] = beesign_temp >> 16;
+    bsDevice.others.name[2] = beesign_temp >> 8;
+    bsDevice.others.name[3] = beesign_temp;
+    beesign_temp = fmc_read(60);
+    bsDevice.others.name[4] = beesign_temp >> 24;
+    bsDevice.others.name[5] = beesign_temp >> 16;
+    bsDevice.others.name[6] = beesign_temp >> 8;
+    bsDevice.others.name[7] = beesign_temp;
+    beesign_temp = fmc_read(61);
+    rcCmdArm = beesign_temp >> 24;
+    rcCmdAlti = beesign_temp >> 16;
+    rcCmdLevel = beesign_temp >> 8;
+    rcCmdRace = beesign_temp;
+    beesign_temp = fmc_read(62);
+    rcCmdHorizon = beesign_temp;
 #endif
 
     }
