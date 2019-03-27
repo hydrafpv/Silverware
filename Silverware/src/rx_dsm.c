@@ -7,6 +7,9 @@
 #include "util.h"
 #include "drv_fmc.h"
 
+#if defined (USE_BEESIGN)
+#include "stick_command.h"
+#endif
 
 
 #if defined(RX_DSMX_2048) || defined(RX_DSM2_1024)
@@ -30,6 +33,7 @@ int rxmode = 0;
 int rx_ready = 0;
 int bind_safety = 0;
 int rx_bind_enable = 0;
+int rx_rssi = 0;
 
 // internal dsm variables
 
@@ -58,7 +62,7 @@ int rx_bind_enable = 0;
 	static uint8_t spek_chan_mask = 0x03;
 #endif
 
-static uint32_t channels[CHANNEL_COUNT];
+uint32_t channels[CHANNEL_COUNT];
 static int rcFrameComplete = 0;
 int framestarted = -1;
 int rx_frame_pending;
@@ -105,6 +109,7 @@ void USART1_IRQHandler(void)
 
 
 
+
 void spektrumFrameStatus(void)
 {
     if (rcFrameComplete == 0) {
@@ -148,7 +153,7 @@ void dsm_init(void)
     USART_InitStructure.USART_Mode = USART_Mode_Rx ;//USART_Mode_Rx | USART_Mode_Tx;
     USART_Init(USART1, &USART_InitStructure);
 // swap rx/tx pins
-#ifndef Alienwhoop_ZERO
+#ifndef USART1_DONT_SWAP
     USART_SWAPPinCmd( USART1, ENABLE);
 #endif
     USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
@@ -191,6 +196,7 @@ void rx_spektrum_bind(void)
         }
 	}
 #endif
+#if defined(SERIAL_RX_SPEKBIND_BINDTOOL_PIN)
         GPIO_InitTypeDef    GPIO_InitStructure;
         GPIO_InitStructure.GPIO_Pin = SERIAL_RX_SPEKBIND_BINDTOOL_PIN;
         GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
@@ -212,6 +218,7 @@ void rx_spektrum_bind(void)
                 PIN_ON(SERIAL_RX_PORT, SERIAL_RX_SPEKBIND_BINDTOOL_PIN);
                 delay(120);
         }	
+#endif
 }
 
 void rx_init(void)
@@ -243,13 +250,12 @@ if (gettime() - flagged_time > FAILSAFETIME) framestarted = 0;            		//wa
 if ( framestarted == 1){
 		    if ((bind_safety < 900) && (bind_safety > 0)) rxmode = RXMODE_BIND;																								// normal rx mode - removes waiting for bind led leaving failsafe flashes as data starts to come in
 		   
-      // TAER channel order
-	#ifdef RX_DSMX_2048																												
-	      rx[0] = (channels[1] - 1024.0f) * dsmx_scalefactor;
-        rx[1] = (channels[2] - 1024.0f) * dsmx_scalefactor;
-        rx[2] = (channels[3] - 1024.0f) * dsmx_scalefactor;
-        rx[3] =((channels[0] - 1024.0f) * dsmx_scalefactor * 0.5f) + 0.5f;
-
+      // AETR channel order
+	#ifdef RX_DSMX_2048
+        rx[0] = ((channels[1]*0.000998005f)-1.02195767f)*3/2;  
+        rx[1] = ((channels[2]*0.000998005f)-1.02195767f)*3/2; 
+        rx[2] = ((channels[3]*0.000998005f)-1.02195767f)*3/2;
+        rx[3] = (((channels[0]*0.000998005f)-1.02195767f)*3/2 + 1 )/2;
 				if ( rx[3] > 1 ) rx[3] = 1;	
 				if ( rx[3] < 0 ) rx[3] = 0;
 	#endif
@@ -263,13 +269,21 @@ if ( framestarted == 1){
 				if ( rx[3] > 1 ) rx[3] = 1;	
 				if ( rx[3] < 0 ) rx[3] = 0;
 	#endif
-				
+				#ifdef USE_BEESIGN
+                if (getAuxCommand(rcCmdLevel)){
+                            if (getAuxCommand(rcCmdRace) && !getAuxCommand(rcCmdHorizon)) {
+                            #else
 				if (aux[LEVELMODE]){
 							if (aux[RACEMODE] && !aux[HORIZON]){
+                #endif // #ifdef USE_BEESIGN
 									if ( ANGLE_EXPO_ROLL > 0.01) rx[0] = rcexpo(rx[0], ANGLE_EXPO_ROLL);
 									if ( ACRO_EXPO_PITCH > 0.01) rx[1] = rcexpo(rx[1], ACRO_EXPO_PITCH);
 									if ( ANGLE_EXPO_YAW > 0.01) rx[2] = rcexpo(rx[2], ANGLE_EXPO_YAW);
+                        #ifdef USE_BEESIGN
+                                }else if (getAuxCommand(rcCmdHorizon)) {
+                        #else
 							}else if (aux[HORIZON]){
+                        #endif  // #ifdef USE_BEESIGN
 									if ( ANGLE_EXPO_ROLL > 0.01) rx[0] = rcexpo(rx[0], ACRO_EXPO_ROLL);
 									if ( ACRO_EXPO_PITCH > 0.01) rx[1] = rcexpo(rx[1], ACRO_EXPO_PITCH);
 									if ( ANGLE_EXPO_YAW > 0.01) rx[2] = rcexpo(rx[2], ANGLE_EXPO_YAW);
@@ -282,7 +296,12 @@ if ( framestarted == 1){
 						if ( ACRO_EXPO_PITCH > 0.01) rx[1] = rcexpo(rx[1], ACRO_EXPO_PITCH);
 						if ( ACRO_EXPO_YAW > 0.01) rx[2] = rcexpo(rx[2], ACRO_EXPO_YAW);
 				}
-							
+#if defined (USE_BEESIGN)			
+			aux[0] = (channels[4] > 1400) ? 2 :(channels[4] > 700) ? 1 : 0;
+		    aux[1] = (channels[5] > 1400) ? 2 :(channels[5] > 700) ? 1 : 0;
+		    aux[2] = (channels[6] > 1400) ? 2 :(channels[6] > 700) ? 1 : 0;
+		    aux[3] = (channels[7] > 1400) ? 2 :(channels[7] > 700) ? 1 : 0;
+#else 	
 	#ifdef RX_DSMX_2048		
 				aux[CHAN_5] = (channels[4] > 1100) ? 1 : 0;													//1100 cutoff intentionally selected to force aux channels low if 
 				aux[CHAN_6] = (channels[5] > 1100) ? 1 : 0;													//being controlled by a transmitter using a 3 pos switch in center state
@@ -335,6 +354,8 @@ if ( framestarted == 1){
   #endif
 #endif
 
+#endif
+    rx_rssi = channels[8];
 
 				if (bind_safety > 900){								//requires 10 good frames to come in before rx_ready safety can be toggled to 1.  900 is about 2 seconds of good data
 					rx_ready = 1;												// because aux channels initialize low and clear the binding while armed flag before aux updates high
