@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #include "config.h"
+#include "hardware.h"
 #if defined (USE_BARO_DPS310)
 #include "drv_dps310.h"
 #include "drv_i2c.h"
