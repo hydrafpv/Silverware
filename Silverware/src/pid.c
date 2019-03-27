@@ -29,6 +29,7 @@ THE SOFTWARE.
 #include "led.h"
 #include "defines.h"
 #include "math.h"
+#include "stick_command.h"
 
 
 
@@ -52,12 +53,12 @@ THE SOFTWARE.
 
 
 //pid profile A						 Roll  PITCH  YAW
-float stickAcceleratorProfileA[3] = { 0.0 , 0.0 , 0.0};           //keep values between 0 and 2.5
-float stickTransitionProfileA[3]  = { 0.0 , 0.0 , 0.0};           //keep values between -1 and 1
+float stickAcceleratorProfileA[3] = { 1.5 , 1.5 , 1.0};           //keep values between 0 and 2.5
+float stickTransitionProfileA[3]  = { 0.3 , 0.3 , 0.0};          //keep values between -1 and 1
 
 //pid profile B						 Roll  PITCH  YAW
-float stickAcceleratorProfileB[3] = { 1.5 , 1.5 , 1.0};           //keep values between 0 and 2.5
-float stickTransitionProfileB[3]  = { 0.3 , 0.3 , 0.0};           //keep values between -1 and 1
+float stickAcceleratorProfileB[3] = { 0.0 , 0.0 , 0.0};           //keep values between 0 and 2.5
+float stickTransitionProfileB[3]  = { 0.0 , 0.0 , 0.0};           //keep values between -1 and 1
 
 
 
@@ -293,7 +294,11 @@ void apply_analog_aux_to_pids()
 // output: pidoutput[x] = change required from motors
 float pid(int x )
 { 
+#ifdef USE_BEESIGN
+	if ((getAuxCommand(rcCmdLevel)) && (!getAuxCommand(rcCmdRace))){
+#else
     if ((aux[LEVELMODE]) && (!aux[RACEMODE])){
+#endif // #ifdef USE_BEESIGN
 				if ((onground) || (in_air == 0)){
 						ierror[x] *= 0.98f;}
 		}else{
@@ -480,7 +485,11 @@ void pid_precalc()
 	if( v_compensation > PID_VC_FACTOR) v_compensation = PID_VC_FACTOR;
 	if( v_compensation < 1.00f) v_compensation = 1.00;
 	#ifdef LEVELMODE_PID_ATTENUATION
+#ifdef USE_BEESIGN
+	if (getAuxCommand(rcCmdLevel)) v_compensation *= LEVELMODE_PID_ATTENUATION;
+#else
 	if (aux[LEVELMODE]) v_compensation *= LEVELMODE_PID_ATTENUATION;
+#endif // #ifdef USE_BEESIGN
 	#endif
 #endif
 }
