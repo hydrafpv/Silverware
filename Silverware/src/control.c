@@ -37,11 +37,14 @@ THE SOFTWARE.
 #include "flip_sequencer.h"
 #include "gestures.h"
 #include "led.h"
+#include "altitude.h"
+#include "stick_command.h"
+#include "altitude.h"
 
 
 
 float	throttle;
-int idle_state;
+uint8_t idle_state;
 extern int armed_state;
 extern int in_air;
 extern int arming_release;
@@ -57,8 +60,8 @@ extern float setpoint[3];
 extern float angleerror[];
 extern float attitude[];
 
-int onground = 1;
-int onground_long = 1;
+uint8_t onground = 1;
+uint8_t onground_long = 1;
 
 float thrsum;
 
@@ -92,9 +95,9 @@ unsigned int consecutive[3];
 
 unsigned long timecommand = 0;
 
-extern int controls_override;
+extern uint8_t controls_override;
 extern float rx_override[];
-extern int acro_override;
+extern uint8_t acro_override;
 
 float overthrottlefilt = 0;
 float underthrottlefilt = 0;
@@ -226,7 +229,13 @@ pid_precalc();
     rates[2] = rate_multiplier * calcBFRatesRad(2);
 #endif
         
+#ifdef USE_BEESIGN
+if (getAuxCommand(rcCmdLevel)&&!acro_override){
+#else
 if (aux[LEVELMODE]&&!acro_override){
+#endif // #ifdef USE_BEESIGN
+	// level mode calculations done after to reduce latency
+	// the 1ms extra latency should not affect cascaded pids significantly
 	extern void stick_vector( float rx_input[] , float maxangle);
 	extern float errorvect[]; // level mode angle error calculated by stick_vector.c	
 	extern float GEstG[3]; // gravity vector for yaw feedforward
@@ -251,8 +260,11 @@ if (aux[LEVELMODE]&&!acro_override){
 	// *************************************************************************
 	// *************************************************************************
 	
-	
+#ifdef USE_BEESIGN
+	if (getAuxCommand(rcCmdRace) && !getAuxCommand(rcCmdHorizon)) {
+#else
 	if (aux[RACEMODE] && !aux[HORIZON]){ //racemode with angle behavior on roll ais
+#endif // #ifdef USE_BEESIGN
 			if (GEstG[2] < 0 ){ // acro on roll and pitch when inverted
 					error[0] = rates[0] - gyro[0];
 					error[1] = rates[1] - gyro[1];
@@ -264,8 +276,11 @@ if (aux[LEVELMODE]&&!acro_override){
 					error[1] = rates[1] - gyro[1];}
 			// yaw
 			error[2] = yawerror[2] - gyro[2];
-		
+#ifdef USE_BEESIGN
+	}else if (getAuxCommand(rcCmdRace) && getAuxCommand(rcCmdHorizon)) {
+#else
 	}else if(aux[RACEMODE] && aux[HORIZON]){	//racemode with horizon behavior on roll axis	
+#endif // #ifdef USE_BEESIGN
 			float inclinationRoll	= attitude[0];
 			float inclinationPitch = attitude[1];
 			float inclinationMax;
@@ -300,8 +315,11 @@ if (aux[LEVELMODE]&&!acro_override){
 	
 			// yaw
 			error[2] = yawerror[2]  - gyro[2];  
-		
+#ifdef USE_BEESIGN
+	}else if (!getAuxCommand(rcCmdRace) && getAuxCommand(rcCmdHorizon)) {
+#else
 	}else if(!aux[RACEMODE] && aux[HORIZON]){ //horizon overrites standard level behavior	
+#endif // #ifdef USE_BEESIGN
 			//pitch and roll
 			for ( int i = 0 ; i <=1; i++){	
 			  	float inclinationRoll	= attitude[0];
@@ -383,8 +401,12 @@ if (aux[LEVELMODE]&&!acro_override){
 		
 #ifndef ARMING
  armed_state = 1;																							 									 // if arming feature is disabled - quad is always armed
-#else																												  											// CONDITION: arming feature is enabled
+#else	
+#ifdef USE_BEESIGN
+	if (!getAuxCommand(rcCmdArm)) {
+#else																										  											// CONDITION: arming feature is enabled
 	if (!aux[ARMING]){																					 										  // 						CONDITION: switch is DISARMED
+#endif // #ifdef USE_BEESIGN
 		armed_state = 0;																															  // 												disarm the quad by setting armed state variable to zero
 		if (rx_ready ==1)	binding_while_armed = 0;																			//                        rx is bound and has been disarmed so clear binding while armed flag
 	}else{ 																				   						  										// 						CONDITION: switch is ARMED
@@ -439,9 +461,14 @@ if (aux[CH_AUX1]){
 #endif
 
 
-
 // turn motors off if throttle is off and pitch / roll sticks are centered
-	if ( failsafe || (throttle < 0.001f && (!ENABLESTIX || !onground_long || aux[LEVELMODE] || (fabsf(rx[ROLL]) < (float) ENABLESTIX_TRESHOLD && fabsf(rx[PITCH]) < (float) ENABLESTIX_TRESHOLD && fabsf(rx[YAW]) < (float) ENABLESTIX_TRESHOLD ) ) ) ) 
+	if ( failsafe || (throttle < 0.001f && (!ENABLESTIX || !onground_long || 
+#ifdef USE_BEESIGN
+	getAuxCommand(rcCmdLevel) ||
+#else
+	aux[LEVELMODE] || 
+#endif // #ifdef USE_BEESIGN
+	(fabsf(rx[ROLL]) < (float) ENABLESTIX_TRESHOLD && fabsf(rx[PITCH]) < (float) ENABLESTIX_TRESHOLD && fabsf(rx[YAW]) < (float) ENABLESTIX_TRESHOLD ) ) ) ) 
 	{	// motors off
 
 		if ( onground_long )
@@ -517,15 +544,52 @@ extern float throttlehpf( float in );
 			  throttle = 1.0f;
 #endif
 		
-	if ( controls_override)
-	{// change throttle in flip mode
-		throttle = rx_override[3];
+
+// In Baro mode, rx[3] is a measure for desired altitude
+// which should be translated to throttle before anything else.
+
+#ifdef ENABLE_BARO
+    float altitude_throttle = altitude_hold();
+#ifdef USE_BEESIGN
+	if (getAuxCommand(rcCmdAlti)) {
+#else
+	if (aux[ALTITUDE_MODE]) {
+#endif // #ifdef USE_BEESIGN
+		extern int rxmode;
+		int rx_good = 0;
+		extern float altitude, alt_target;
+		// int baro_enabled = 1;
+#ifdef USE_BEESIGN
+		if (getAuxCommand(rcCmdLevel) && rxmode == RXMODE_NORMAL)
+#else
+		if (aux[LEVELMODE] && rxmode == RXMODE_NORMAL)
+#endif // #ifdef USE_BEESIGN
+		{
+			rx_good = (rx_good || !(rx[0]==0 && rx[1]==0 && rx[2]==0 && rx[3]==0));
+			if (rx_good)
+			{
+				throttle = altitude_throttle;
+			}
+			else
+			{
+				alt_target = altitude;
+			}
+		}
+	} else {
+		if ( controls_override)
+		{// change throttle in flip mode
+			throttle = rx_override[3];
+		}
 	}
-		
+#endif
 	
 		  // throttle angle compensation
 #ifdef AUTO_THROTTLE
+#ifdef USE_BEESIGN
+		  if (getAuxCommand(rcCmdLevel))
+#else
 		  if (aux[LEVELMODE])
+#endif // #ifdef USE_BEESIGN
 		    {
 			    //float autothrottle = fastcos(attitude[0] * DEGTORAD) * fastcos(attitude[1] * DEGTORAD);
 			    extern float GEstG[];
