@@ -290,3 +290,69 @@
 #define MOTOR2_PIN_PA4
 #define MOTOR3_PIN_PA6
 #endif
+
+#ifdef HUMMINGBIRD
+//LEDS
+#define LED_NUMBER 2
+#define LED1PIN GPIO_Pin_1
+#define LED1PORT GPIOF
+#define LED2PIN GPIO_Pin_15
+#define LED2PORT GPIOA
+#define LED1_INVERT
+#define LED2_INVERT
+
+//SOFT I2C & GYRO
+#define SOFTI2C_SDAPIN GPIO_Pin_10
+#define SOFTI2C_SDAPORT GPIOA
+#define SOFTI2C_SCLPIN GPIO_Pin_9
+#define SOFTI2C_SCLPORT GPIOA
+#define SOFTI2C_GYRO_ADDRESS 0x68
+#define GYRO_ID_1 0x68
+#define GYRO_ID_2 0x98 // new id
+#define GYRO_ID_3 0x7D
+#define GYRO_ID_4 0x72
+#define SENSOR_ROTATE_90_CW
+
+// SPI PINS DEFINITONS & RADIO
+#if defined(RX_SBUS) || defined(RX_DSMX_2048) || defined(RX_DSM2_1024)
+// #define SERIAL_RX_SPEKBIND_BINDTOOL_PIN GPIO_Pin_2
+// #define SERIAL_RX_SPEKBIND_RX_PIN GPIO_Pin_3
+#define SERIAL_RX_PIN GPIO_Pin_3
+#define SERIAL_RX_PORT GPIOA
+#define SERIAL_RX_SOURCE GPIO_PinSource3
+#define SERIAL_RX_CHANNEL GPIO_AF_1
+#define SOFTSPI_NONE
+#define USART1_DONT_SWAP
+//dummy spi placeholders
+#define SPI_MOSI_PIN GPIO_Pin_x
+#define SPI_MOSI_PORT GPIOA
+#define SPI_CLK_PIN GPIO_Pin_y
+#define SPI_CLK_PORT GPIOA
+#define SPI_SS_PIN GPIO_Pin_z
+#define SPI_SS_PORT GPIOA
+#define RADIO_CHECK
+#else
+#define SOFTSPI_3WIRE
+#define SPI_MOSI_PIN GPIO_Pin_3
+#define SPI_MOSI_PORT GPIOA
+#define SPI_CLK_PIN GPIO_Pin_2
+#define SPI_CLK_PORT GPIOA
+#define SPI_SS_PIN GPIO_Pin_1
+#define SPI_SS_PORT GPIOA
+#define RADIO_CHECK
+#define RADIO_XN297L
+#endif
+
+//VOLTAGE DIVIDER
+#define BATTERYPIN GPIO_Pin_5
+#define BATTERYPORT GPIOA
+#define BATTERY_ADC_CHANNEL ADC_Channel_5
+#define ADC_SCALEFACTOR 0.00274
+#define ADC_REF 1.0f
+
+// MOTOR PINS
+#define MOTOR0_PIN_PA7
+#define MOTOR1_PIN_PB1
+#define MOTOR2_PIN_PA4
+#define MOTOR3_PIN_PA6
+#endif
