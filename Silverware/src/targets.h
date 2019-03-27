@@ -350,6 +350,10 @@
 #define ADC_SCALEFACTOR 0.00274
 #define ADC_REF 1.0f
 
+#ifndef ADC_REF_VOLTAGE
+#define ADC_REF_VOLTAGE 3.3
+#endif
+
 // MOTOR PINS
 #define MOTOR0_PIN_PA7
 #define MOTOR1_PIN_PB1
