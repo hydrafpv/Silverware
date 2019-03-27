@@ -37,15 +37,15 @@
 
 
 
-int acro_override = 0;
-int level_override = 0;
-int controls_override = 0;
+uint8_t acro_override = 0;
+uint8_t level_override = 0;
+uint8_t controls_override = 0;
 unsigned long fliptime;
-int isflipping = 0;
-int flipstage = STAGE_FLIP_NONE;
+uint8_t isflipping = 0;
+uint8_t flipstage = STAGE_FLIP_NONE;
 unsigned int levelmodetime;
-int flipindex = 0;
-int flipdir = 0;
+uint8_t flipindex = 0;
+uint8_t flipdir = 0;
 
 extern int onground;
 extern float GEstG[3];
