@@ -14,16 +14,16 @@
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
-          <Device>STM32F030F4</Device>
+          <Device>STM32F031K6Ux</Device>
           <Vendor>STMicroelectronics</Vendor>
           <PackID>Keil.STM32F0xx_DFP.2.0.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
-          <Cpu>IRAM(0x20000000,0x1000) IROM(0x08000000,0x4000) CPUTYPE("Cortex-M0") CLOCK(12000000) ELITTLE</Cpu>
+          <Cpu>IRAM(0x20000000,0x00001000) IROM(0x08000000,0x00008000) CPUTYPE("Cortex-M0") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F0xx_16 -FS08000000 -FL04000 -FP0($$Device:STM32F030F4$Flash\STM32F0xx_16.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F0xx_32 -FS08000000 -FL08000 -FP0($$Device:STM32F031K6Ux$CMSIS\Flash\STM32F0xx_32.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile>$$Device:STM32F030F4$Device\Include\stm32f0xx.h</RegisterFile>
+          <RegisterFile>$$Device:STM32F031K6Ux$Drivers\CMSIS\Device\ST\STM32F0xx\Include\stm32f0xx.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -33,7 +33,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:STM32F030F4$SVD\STM32F0x0.svd</SFDFile>
+          <SFDFile>$$Device:STM32F031K6Ux$CMSIS\SVD\STM32F0x1.svd</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -250,7 +250,7 @@
               <IROM>
                 <Type>1</Type>
                 <StartAddress>0x8000000</StartAddress>
-                <Size>0x4000</Size>
+                <Size>0x8000</Size>
               </IROM>
               <XRAM>
                 <Type>0</Type>
@@ -625,6 +625,81 @@
               <FileName>serial_4way_avrootloader.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\serial_4way_avrootloader.c</FilePath>
+            </File>
+            <File>
+              <FileName>rx_bayang_protocol_telemetry_autobind.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\rx_bayang_protocol_telemetry_autobind.c</FilePath>
+            </File>
+            <File>
+              <FileName>rx_dsm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\rx_dsm.c</FilePath>
+            </File>
+            <File>
+              <FileName>beesign.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\beesign.c</FilePath>
+            </File>
+            <File>
+              <FileName>beesign_osd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\beesign_osd.c</FilePath>
+            </File>
+            <File>
+              <FileName>beesign_vtx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\beesign_vtx.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\menu.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_fc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\menu_fc.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_osd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\menu_osd.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_rx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\menu_rx.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_vtx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\menu_vtx.c</FilePath>
+            </File>
+            <File>
+              <FileName>altitude.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\altitude.c</FilePath>
+            </File>
+            <File>
+              <FileName>drv_dps310.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\drv_dps310.c</FilePath>
+            </File>
+            <File>
+              <FileName>stick_command.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\stick_command.c</FilePath>
+            </File>
+            <File>
+              <FileName>barometer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\barometer.c</FilePath>
+            </File>
+            <File>
+              <FileName>button.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\button.c</FilePath>
             </File>
           </Files>
         </Group>
