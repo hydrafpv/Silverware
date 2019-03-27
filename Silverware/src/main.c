@@ -50,6 +50,16 @@ THE SOFTWARE.
 #include "drv_fmc2.h"
 #include "gestures.h"
 #include "binary.h"
+#include "drv_dps310.h"
+#include "altitude.h"
+#include "barometer.h"
+#include "button.h"
+
+#if defined (USE_BEESIGN)
+#include "beesign.h"
+#include "stick_command.h"
+#include "menu.h"
+#endif
 
 #include <stdio.h>
 #include <math.h>
@@ -188,7 +198,29 @@ clk_init();
         //gyro not found   
 		failloop(4);
 	}
-	
+
+#ifdef ENABLE_BARO
+    barometer_init();
+
+    if (barometer_check())
+    {
+    }
+    else
+    {
+        //barometer not found
+        failloop(3);
+    }
+
+	if (altitude_check())
+    {
+    }
+    else
+    {
+        //altitude check error
+        failloop(6);
+    }
+#endif
+
 	adc_init();
 //set always on channel to on
 aux[CH_ON] = 1;	
@@ -254,6 +286,9 @@ if ( vbattfilt/lipo_cell_count < 3.3f) failloop(2);
 
 
 	gyro_cal();
+#ifdef ENABLE_BARO
+    altitude_cal();
+#endif
 
 extern void rgb_init( void);
 rgb_init();
@@ -279,7 +314,11 @@ if ( liberror )
 {
 		failloop(7);
 }
-
+#if defined (USE_BEESIGN)
+buttonInit();
+beesignInit();
+menuInit();
+#endif
 
 
  lastlooptime = gettime();
@@ -302,7 +341,7 @@ if ( liberror )
 		looptime = ((uint32_t)( time - lastlooptime));
 		if ( looptime <= 0 ) looptime = 1;
 		looptime = looptime * 1e-6f;
-		if ( looptime > 0.02f ) // max loop 20ms
+		if ( looptime > 0.03f ) // max loop 20ms
 		{
 			failloop( 6);	
 			//endless loop			
@@ -323,6 +362,10 @@ if ( liberror )
         // read gyro and accelerometer data	
 		sixaxis_read();
 		
+#ifdef ENABLE_BARO
+        // read the altitude
+        altitude_read();
+#endif
         // all flight calculations and motors
 		control();
 
@@ -560,6 +603,15 @@ rgb_dma_start();
 // receiver function
 checkrx();
 
+#if defined (USE_BUTTON)
+buttonTask();
+#endif
+
+#if defined (USE_BEESIGN)
+stickCommandTask();
+beesignTask();
+menuTask();
+#endif
 
 #ifdef DEBUG
 	debug.cpu_load = (gettime() - lastlooptime )*1e-3f;
