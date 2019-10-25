@@ -402,13 +402,13 @@
 
 
 #if defined MOTOR_MIN_COMMAND && defined (BRUSHLESS_TARGET)
-	#define IDLE_OFFSET  (MOTOR_MIN_COMMAND*20)  //dshot has 2000 steps
+	#define IDLE_OFFSET  (MOTOR_MIN_COMMAND*10)  //dshot has 2000 steps
 #endif
 #if defined MOTOR_MIN_COMMAND2 && defined (BRUSHLESS_TARGET)
-	#define IDLE_OFFSET  (MOTOR_MIN_COMMAND2*20)  //dshot has 2000 steps
+	#define IDLE_OFFSET  (MOTOR_MIN_COMMAND2*10)  //dshot has 2000 steps
 #endif
 #if defined MOTOR_MIN_COMMAND3 && defined (BRUSHLESS_TARGET)
-	#define IDLE_OFFSET  (MOTOR_MIN_COMMAND3*20)  //dshot has 2000 steps
+	#define IDLE_OFFSET  (MOTOR_MIN_COMMAND3*10)  //dshot has 2000 steps
 #endif
 
 

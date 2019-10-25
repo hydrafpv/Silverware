@@ -429,7 +429,7 @@ if (aux[LEVELMODE]&&!acro_override){
 #endif
 	
 #ifndef IDLE_THR
-	#define IDLE_THR .05f
+	#define IDLE_THR .001f
 #endif
 
 	if (armed_state == 0){                                     												// CONDITION: armed state variable is 0 so quad is DISARMED					
@@ -1025,19 +1025,19 @@ thrsum = 0;		//reset throttle sum for voltage monitoring logic in main loop
 
 
 //***********************Min Motor Command Logic
-		#ifdef MOTOR_MIN_COMMAND			// clipping style min motor command
+		#ifdef MOTOR_MIN_COMMAND3			// clipping style min motor command
 		#ifdef BRUSHLESS_TARGET
 		// do nothing - idle set by DSHOT
 		#else     //clipping style min motor command override
-		if (mix[i] < (float) MOTOR_MIN_COMMAND * 0.01f)  mix[i] = (float) MOTOR_MIN_COMMAND * 0.01f;
+		if (mix[i] < (float) MOTOR_MIN_COMMAND3 * 0.01f)  mix[i] = (float) MOTOR_MIN_COMMAND3 * 0.01f;
 		#endif
 		#endif
 		
-		#ifdef MOTOR_MIN_COMMAND3   // for testing purposes:  mapping style min motor command.  remaps entire range of motor commands from user set min value to 1
+		#ifdef MOTOR_MIN_COMMAND   // for testing purposes:  mapping style min motor command.  remaps entire range of motor commands from user set min value to 1
 		#ifdef BRUSHLESS_TARGET
 		// do nothing - idle set by DSHOT
 		#else
-			float motor_min_value = (float) MOTOR_MIN_COMMAND3 * 0.01f;
+			float motor_min_value = (float) MOTOR_MIN_COMMAND * 0.01f;
 			if ( mix[i] < 0 ) mix[i] = 0;											//Clip all mixer values into 0 to 1 range before remapping
 			if ( mix[i] > 1 ) mix[i] = 1;	
 			mix[i] = motor_min_value + mix[i] * (1.0f - motor_min_value);

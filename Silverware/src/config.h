@@ -13,10 +13,12 @@
 //#define BWHOOP
 //#define E011
 //#define H8mini_blue_board
-// #define Alienwhoop_ZERO  // requires defining RX_SBUS radio protocol
+//#define Alienwhoop_ZERO
+//#define Silverlite_Brushless
 #define HUMMINGBIRD
 
 #define USE_BEESIGN
+
 
 //**********************************************************************************************************************
 //***********************************************RATES & EXPO SETTINGS**************************************************
@@ -103,7 +105,6 @@
 //*************racemode or horizon are switched on.
 #define ARMING CHAN_5
 #define IDLE_UP CHAN_5
-#define IDLE_THR 0.05f                   //This designates an idle throttle of 5%
 #define LEVELMODE CHAN_6
 #define RACEMODE  CHAN_7
 #define HORIZON   CHAN_8
@@ -138,7 +139,7 @@
 // ************* Set your lipo cell count to override auto cell count detect logic
 //#define LIPO_CELL_COUNT 1
 
-// ************* Raises pids automatically as battery voltage drops in flight.  Ensure voltage is calibrated before use.
+// ************* Raises pids automatically as battery voltage drops in flight.  Ensure voltage is calibrated before use ****CRITICAL****.
 #define PID_VOLTAGE_COMPENSATION
 #define LEVELMODE_PID_ATTENUATION 0.90f  //used to prevent oscillations in angle modes with pid_voltage_compensation enabled due to high pids
 
@@ -233,6 +234,9 @@
 //**********************************************************************************************************************
 //***********************************************MOTOR OUTPUT SETTINGS**************************************************
 
+// minimum motor output: *for brushed a % value (0.0 - 100.0)   *for brushless this sets digital idle % for DSHOT for any selection
+#define MOTOR_MIN_COMMAND  5.0
+
 // *************invert yaw pid for "PROPS OUT" configuration - This feature is switchable to "PROPS IN" when active with stick gesture DOWN-UP-DOWN, Save selection with DOWN-DOWN-DOWN
 #define INVERT_YAW_PID
 
@@ -288,6 +292,14 @@
 // *************Comment out to disable pid tuning gestures
 #define PID_GESTURE_TUNING
 #define COMBINE_PITCH_ROLL_PID_TUNING
+
+// *************Comment out for original relative proportional inc/dec steps for PID values
+#define PID_TUNING_INCDEC_FACTOR 0.5f //fixed inc/dec values for PID tuning - by SilverAG
+//Default value is 0.5f which means that PID values will be increased or decreased by constant index of 0.5
+//For example, if PID value is 10.0 it will be incremented by 0.5 to 10.5 or decremented by 0.5 to 9.5
+//Feel free to change 0.5f value to your liking
+
+
 
 
 // *************enable inverted flight code ( brushless only )
@@ -347,17 +359,14 @@
 //will also not activate on the ground untill this threshold is passed during takeoff for safety and better staging behavior.
 #define THROTTLE_SAFETY .10f
 
+//Activating this setting makes the accelerometer less prone to drift or yaw slow down in angle mode but more likely to become confused in crashes or impacts.  Only use if necessary
+//#define ACCELEROMETER_DRIFT_FIX
+
 // level mode "manual" trims ( in degrees)
 // pitch positive forward
 // roll positive right
 #define TRIM_PITCH 0.0
 #define TRIM_ROLL 0.0
-
-// minimum motor output: *for brushed a % value (0.0 - 100.0)   *for brushless this sets digital idle % for DSHOT for any selection (fyi: old silverware dshot default would be 2.0 here)
-//****SELECT ONLY ONE
-#define MOTOR_MIN_COMMAND  5.0        //clipping style min motor command logic for brushed motors - cuts off values below limit
-//#define MOTOR_MIN_COMMAND2  5.0			//scaling style min motor command logic for brushed motors - scales up all motors by underlimit amount
-//#define MOTOR_MIN_COMMAND3  5.0			//mapping style min motor command logic for brushed motors - remaps entire motor output range 
 
 // flash saving features
 //#define DISABLE_GESTURES2
@@ -366,7 +375,7 @@
 //#define NOMOTORS
 
 // throttle direct to motors for thrust measure
-// #define MOTORS_TO_THROTTLE
+//#define MOTORS_TO_THROTTLE
 
 // throttle direct to motors for thrust measure as a flight mode
 //#define MOTORS_TO_THROTTLE_MODE CHAN_OFF

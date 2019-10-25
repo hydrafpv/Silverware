@@ -286,7 +286,7 @@ void crsf_init(void)
     USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
     USART_Init(USART1, &USART_InitStructure);
 // swap rx/tx pins
-#ifndef Alienwhoop_ZERO
+#ifdef SERIAL_RX_SWD
     USART_SWAPPinCmd( USART1, ENABLE);
 #endif
     USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);

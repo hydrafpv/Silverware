@@ -38,7 +38,7 @@
 
 // i2c driver to use ( dummy - disables i2c )
 // hardware i2c used PB6 and 7 by default ( can also use PA9 and 10)
-#define USE_HARDWARE_I2C
+//#define USE_HARDWARE_I2C
 //#define USE_SOFTWARE_I2C
 //#define USE_DUMMY_I2C
 
@@ -62,6 +62,13 @@
 // select pins PB6 and PB7 OR select pins PA9 and PA10
 //#define HW_I2C_PINS_PB67
 #define HW_I2C_PINS_PA910
+
+// pins for software i2c
+#define SOFTI2C_SDAPIN GPIO_Pin_10
+#define SOFTI2C_SDAPORT GPIOA
+#define SOFTI2C_SCLPIN GPIO_Pin_9
+#define SOFTI2C_SCLPORT GPIOA
+#define SOFTI2C_GYRO_ADDRESS 0x68
 
 
 // disable the check for known gyro that causes the 4 times flash

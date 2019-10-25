@@ -138,7 +138,7 @@ void sbus_init(void)
 
     USART_Init(USART1, &USART_InitStructure);
 // swap rx/tx pins
-#ifndef USART1_DONT_SWAP
+#ifdef SERIAL_RX_SWD
     USART_SWAPPinCmd( USART1, ENABLE);
 #endif
 // invert signal ( default sbus )
@@ -317,7 +317,8 @@ if ( frame_received )
         channels[2]-= 173; 
         rx[3] = 0.000610128f * channels[2]; 
         
-        if ( rx[3] > 1 ) rx[3] = 1;
+				if ( rx[3] > 1 ) rx[3] = 1;	
+				if ( rx[3] < 0 ) rx[3] = 0;
 				
 #if defined (USE_BEESIGN)			
 			aux[0] = (channels[4] > 1400) ? 2 :(channels[4] > 700) ? 1 : 0;
