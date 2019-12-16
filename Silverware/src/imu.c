@@ -24,25 +24,33 @@ extern debug_type debug;
 // disable drift correction ( for testing)
 #define DISABLE_ACC 0
 
-#ifdef ACCELEROMETER_DRIFT_FIX
+//*************************************************************************************************************************************
+#ifdef ACCELEROMETER_DRIFT_FIX //(some targets have this enabled by default)
 // filter time in seconds
 // time to correct gyro readings using the accelerometer
 // 1-4 are generally good
-#define FILTERTIME 5.0
+#define FASTFILTER 0.05	//onground filter
+#define PREFILTER 0.5	//in_air prefilter
+#define FILTERTIME 4	//in_air fusion filter
 
 // accel magnitude limits for drift correction
 #define ACC_MIN 0.9f
 #define ACC_MAX 1.1f
 #else
+//*************************************************************************************************************************************
+//*************************************************************************************************************************************
 // filter time in seconds
 // time to correct gyro readings using the accelerometer
-// 1-4 are generally good
-#define FILTERTIME 2.0
+// 1-4 are generally good - lower filtertime means stronger contribution from the accelerometer in sensor fusion
+#define FASTFILTER 0.05	//onground filter - provides immediate recovery on ground for a perfect takeoff after a crash
+//#define PREFILTER 0.5	//in_air prefilter (drop filtertime to 1.0 if you enable this - I am still undecided which is better)
+#define FILTERTIME 2.0	//in_air fusion filter
 
 // accel magnitude limits for drift correction
 #define ACC_MIN 0.7f
 #define ACC_MAX 1.3f
 #endif
+//*************************************************************************************************************************************
 
 float GEstG[3] = { 0, 0, ACC_1G };
 
@@ -158,31 +166,57 @@ void imu_calc(void)
 	GEstG[1] = (deltaGyroAngle[2]) * GEstG[0] +  GEstG[1];
 
 
-// calc acc mag
-	float accmag;
+//extern float stickvector[3];
+extern int onground;
+  if(onground){		//happyhour bartender - quad is ON GROUND and disarmed
+	  // calc acc mag
+	  float accmag = calcmagnitude(&accel[0]);
+  	  if ((accmag > ACC_MIN * ACC_1G) && (accmag < ACC_MAX * ACC_1G)) {
+  		  // normalize acc
+  		  for (int axis = 0; axis < 3; axis++) {
+  			  accel[axis] = accel[axis] * (ACC_1G / accmag);
+  		  }
 
-	accmag = calcmagnitude(&accel[0]);
-
-
-	if ((accmag > ACC_MIN * ACC_1G) && (accmag < ACC_MAX * ACC_1G) && !DISABLE_ACC)
-	  {			 
-        // normalize acc
-        for (int axis = 0; axis < 3; axis++)
-        {
-            accel[axis] = accel[axis] * ( ACC_1G / accmag);
-        }       
-        float filtcoeff = lpfcalc_hz( looptime, 1.0f/(float)FILTERTIME);
-        for (int x = 0; x < 3; x++)
-          {
-              lpf(&GEstG[x], accel[x], filtcoeff);
-          }
+  		  float filtcoeff = lpfcalc_hz(looptime, 1.0f / (float)FASTFILTER);
+  		  for (int x = 0; x < 3; x++) {
+  			  lpf(&GEstG[x], accel[x], filtcoeff);
+  		  }
+  	  }
+  }else{		//lateshift bartender - quad is IN AIR and things are getting wild
+		#ifdef PREFILTER
+	  // hit accel[3] with a sledgehammer
+	  float filtcoeff = lpfcalc_hz(looptime, 1.0f / (float)PREFILTER);
+	  for (int x = 0; x < 3; x++) {
+		  lpf(&accel[x], accel[x], filtcoeff);
 	  }
+		#endif
+	  // calc mag of filtered acc
+	  float accmag = calcmagnitude(&accel[0]);
+//	  float stickmag = calcmagnitude(&stickvector[0]);
+  	  if ((accmag > ACC_MIN * ACC_1G) && (accmag < ACC_MAX * ACC_1G)){//The bartender makes the fusion if..... 
+  		  // normalize acc
+  		  for (int axis = 0; axis < 3; axis++) {
+  			  accel[axis] = accel[axis] * (ACC_1G / accmag);
+  		  }
+  		  // filter accel on to GEstG
+  		  float filtcoeff = lpfcalc_hz(looptime, 1.0f / (float)FILTERTIME);
+  		  for (int x = 0; x < 3; x++) {
+  			  lpf(&GEstG[x], accel[x], filtcoeff);
+  		  }
+  		  //heal the gravity vector after nudging it with accel (this is the fix for the yaw slow down bug some FC experienced)
+  		  float GEstGmag = calcmagnitude(&GEstG[0]);
+  		  for (int axis = 0; axis < 3; axis++) {
+  			  GEstG[axis] = GEstG[axis] * (ACC_1G / GEstGmag);
+  		  }
+  	  }
+  }
 
-
+extern char aux[AUXNUMBER];
+if (aux[HORIZON]){
 	attitude[0] = atan2approx(GEstG[0], GEstG[2]) ;
 
 	attitude[1] = atan2approx(GEstG[1], GEstG[2])  ;
-
+}
 }
 
 

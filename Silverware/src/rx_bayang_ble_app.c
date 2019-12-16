@@ -62,7 +62,7 @@ THE SOFTWARE.
 // You can use letters A to Z, numbers 0 to 9 and some special characters like # / \ - _ etc.
 // Please use only caps lock letters because name is not case sensitive. Avoid using blanks in name!
 
-#define MY_QUAD_NAME "BWHOOP"
+#define MY_QUAD_NAME "LIKE A BOSS"
 
 // MY_QUAD_ID defines unique ID for MAC address. Leave 127 or replace it with any other value between 0 and 255.
 // Use ONLY values between 0 and 255!
@@ -244,7 +244,7 @@ static uint8_t regs_1e[4] = { 0x3e , 0xf6 , 0x37 , 0x5d };
 writeregs( regs_1e , sizeof(regs_1e) );
 
 
-#define XN_POWER B00000001|((TX_POWER&7)<<3)
+#define XN_POWER B00000001|((TX_POWER&7)<<1)
 
 #define XN_TO_RX B10001111
 #define XN_TO_TX B10000010

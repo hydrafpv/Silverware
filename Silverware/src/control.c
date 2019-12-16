@@ -176,8 +176,10 @@ float rate_multiplier = 1.0;
 	{
 		#ifdef STOCK_TX_AUTOCENTER
 		rxcopy[i] = (rx[i] - autocenter[i]);
+		limitf(&rxcopy[i], 1.0);
 		#else
 		rxcopy[i] = rx[i];
+		limitf(&rxcopy[i], 1.0);
 		#endif
 		#ifdef STICKS_DEADBAND
 		if ( fabsf( rxcopy[ i ] ) <= STICKS_DEADBAND ) {
