@@ -22,9 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "hardware.h"
 #include "barometer.h"
 #include "drv_dps310.h"
+#include "hardware.h"
 
 /*
 #ifdef ENABLE_BARO
@@ -33,33 +33,30 @@ THE SOFTWARE.
 #endif
 */
 
-void barometer_init(void)
-{
+void barometer_init(void) {
 #ifdef USE_BARO_DPS310
-    dps310_init();
+   dps310_init();
 #endif
 }
 
-int barometer_check(void)
-{
+int barometer_check(void) {
 #ifndef DISABLE_BARO_CHECK
 #ifdef USE_BARO_DPS310
-    return dps310_check();
-#else 
-    return 1;
+   return dps310_check();
+#else
+   return 1;
 #endif
 #else
-    return 1;
+   return 1;
 #endif
 }
 
-float read_pressure(void)
-{
+float read_pressure(void) {
 #ifdef USE_BARO_DPS310
-    dps310_read_pressure();
-    dps310_pcomp_lpf();
-    return 0;
+   dps310_read_pressure();
+   dps310_pcomp_lpf();
+   return 0;
 #else
-    return 0;
+   return 0;
 #endif
 }

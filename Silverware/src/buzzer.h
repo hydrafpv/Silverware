@@ -1,3 +1,1 @@
-void buzzer( void);
-
-
+void buzzer(void);

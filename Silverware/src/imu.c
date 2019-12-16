@@ -1,22 +1,21 @@
 
 // library headers
-#include <stdbool.h>
 #include <inttypes.h>
+#include <stdbool.h>
 
 //#define _USE_MATH_DEFINES
-#include <math.h>
 #include "drv_time.h"
+#include <math.h>
 
-#include "util.h"
-#include "sixaxis.h"
 #include "defines.h"
+#include "sixaxis.h"
+#include "util.h"
 
 #include <stdlib.h>
 
-#if defined (USE_BEESIGN)
+#if defined(USE_BEESIGN)
 #include "stick_command.h"
 #endif
-
 
 #ifdef DEBUG
 #include "debug.h"
@@ -33,9 +32,9 @@ extern debug_type debug;
 // filter time in seconds
 // time to correct gyro readings using the accelerometer
 // 1-4 are generally good
-#define FASTFILTER 0.05	//onground filter
-#define PREFILTER 0.5	//in_air prefilter
-#define FILTERTIME 4	//in_air fusion filter
+#define FASTFILTER 0.05 //onground filter
+#define PREFILTER 0.5   //in_air prefilter
+#define FILTERTIME 4    //in_air fusion filter
 
 // accel magnitude limits for drift correction
 #define ACC_MIN 0.9f
@@ -46,9 +45,9 @@ extern debug_type debug;
 // filter time in seconds
 // time to correct gyro readings using the accelerometer
 // 1-4 are generally good - lower filtertime means stronger contribution from the accelerometer in sensor fusion
-#define FASTFILTER 0.05	//onground filter - provides immediate recovery on ground for a perfect takeoff after a crash
+#define FASTFILTER 0.05 //onground filter - provides immediate recovery on ground for a perfect takeoff after a crash
 //#define PREFILTER 0.5	//in_air prefilter (drop filtertime to 1.0 if you enable this - I am still undecided which is better)
-#define FILTERTIME 2.0	//in_air fusion filter
+#define FILTERTIME 2.0  //in_air fusion filter
 
 // accel magnitude limits for drift correction
 #define ACC_MIN 0.7f
@@ -56,7 +55,7 @@ extern debug_type debug;
 #endif
 //*************************************************************************************************************************************
 
-float GEstG[3] = { 0, 0, ACC_1G };
+float GEstG[3] = {0, 0, ACC_1G};
 
 float attitude[3];
 
@@ -64,70 +63,56 @@ extern float gyro[3];
 extern float accel[3];
 extern float accelcal[3];
 
+void imu_init(void) {
+   // init the gravity vector with accel values
+   for (int xx = 0; xx < 100; xx++) {
+      sixaxis_read();
 
-void imu_init(void)
-{
-	// init the gravity vector with accel values
-	for (int xx = 0; xx < 100; xx++)
-	  {
-		  sixaxis_read();
-
-		  for (int x = 0; x < 3; x++)
-		    {
-			    lpf(&GEstG[x], accel[x]* ( 1/ 2048.0f) , 0.85);
-		    }
-		  delay(1000);
-
-
-	  }
+      for (int x = 0; x < 3; x++) {
+         lpf(&GEstG[x], accel[x] * (1 / 2048.0f), 0.85);
+      }
+      delay(1000);
+   }
 }
 
 // from http://en.wikipedia.org/wiki/Fast_inverse_square_root
 // originally from quake3 code
 
-float Q_rsqrt( float number )
-{
+float Q_rsqrt(float number) {
 
-	long i;
-	float x2, y;
-	const float threehalfs = 1.5F;
+   long i;
+   float x2, y;
+   const float threehalfs = 1.5F;
 
-	x2 = number * 0.5F;
-	y  = number;
-	i  = * ( long * ) &y;                       
-	i  = 0x5f3759df - ( i >> 1 );               
-	y  = * ( float * ) &i;
-	y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
-	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
-//	y  = y * ( threehalfs - ( x2 * y * y ) );   // 3nd iteration, this can be removed
-	
-	return y;
+   x2 = number * 0.5F;
+   y = number;
+   i = *(long *)&y;
+   i = 0x5f3759df - (i >> 1);
+   y = *(float *)&i;
+   y = y * (threehalfs - (x2 * y * y)); // 1st iteration
+   y = y * (threehalfs - (x2 * y * y)); // 2nd iteration, this can be removed
+                                        //	y  = y * ( threehalfs - ( x2 * y * y ) );   // 3nd iteration, this can be removed
+
+   return y;
 }
-
 
 void vectorcopy(float *vector1, float *vector2);
 
-
 float atan2approx(float y, float x);
 
-float calcmagnitude(float vector[3])
-{
-	float accmag = 0;
-	for (uint8_t axis = 0; axis < 3; axis++)
-	  {
-		  accmag += vector[axis] * vector[axis];
-	  }
-	accmag = 1.0f/Q_rsqrt(accmag);
-	return accmag;
+float calcmagnitude(float vector[3]) {
+   float accmag = 0;
+   for (uint8_t axis = 0; axis < 3; axis++) {
+      accmag += vector[axis] * vector[axis];
+   }
+   accmag = 1.0f / Q_rsqrt(accmag);
+   return accmag;
 }
 
-
-void vectorcopy(float *vector1, float *vector2)
-{
-	for (int axis = 0; axis < 3; axis++)
-	  {
-		  vector1[axis] = vector2[axis];
-	  }
+void vectorcopy(float *vector1, float *vector2) {
+   for (int axis = 0; axis < 3; axis++) {
+      vector1[axis] = vector2[axis];
+   }
 }
 
 extern float looptime;
@@ -196,49 +181,58 @@ void imu_calc(void) {
       }
    }
 
-
-// #ifdef USE_BEESIGN
-//    if (getAuxCommand(rcCmdHorizon)) {
-// #else
-//    if (aux[HORIZON]) {
-// #endif // #ifdef USE_BEESIGN
-      attitude[0] = atan2approx(GEstG[0], GEstG[2]);
-      attitude[1] = atan2approx(GEstG[1], GEstG[2]);
+   // #ifdef USE_BEESIGN
+   //    if (getAuxCommand(rcCmdHorizon)) {
+   // #else
+   //    if (aux[HORIZON]) {
+   // #endif // #ifdef USE_BEESIGN
+   attitude[0] = atan2approx(GEstG[0], GEstG[2]);
+   attitude[1] = atan2approx(GEstG[1], GEstG[2]);
    // }
 }
 
+#define M_PI 3.14159265358979323846 /* pi */
 
-
-#define M_PI  3.14159265358979323846	/* pi */
-
-
-#define OCTANTIFY(_x, _y, _o)   do {                            \
-    float _t;                                                   \
-    _o= 0;                                                \
-    if(_y<  0)  {            _x= -_x;   _y= -_y; _o += 4; }     \
-    if(_x<= 0)  { _t= _x;    _x=  _y;   _y= -_t; _o += 2; }     \
-    if(_x<=_y)  { _t= _y-_x; _x= _x+_y; _y=  _t; _o += 1; }     \
-} while(0);
+#define OCTANTIFY(_x, _y, _o) \
+   do {                       \
+      float _t;               \
+      _o = 0;                 \
+      if (_y < 0) {           \
+         _x = -_x;            \
+         _y = -_y;            \
+         _o += 4;             \
+      }                       \
+      if (_x <= 0) {          \
+         _t = _x;             \
+         _x = _y;             \
+         _y = -_t;            \
+         _o += 2;             \
+      }                       \
+      if (_x <= _y) {         \
+         _t = _y - _x;        \
+         _x = _x + _y;        \
+         _y = _t;             \
+         _o += 1;             \
+      }                       \
+   } while (0);
 
 // +-0.09 deg error
-float atan2approx(float y, float x)
-{
+float atan2approx(float y, float x) {
 
-	if (x == 0)
-		x = 123e-15f;
-	float phi = 0;
-	float dphi;
-	float t;
+   if (x == 0)
+      x = 123e-15f;
+   float phi = 0;
+   float dphi;
+   float t;
 
-	OCTANTIFY(x, y, phi);
+   OCTANTIFY(x, y, phi);
 
-	t = (y / x);
-	// atan function for 0 - 1 interval
-	dphi = t*( ( M_PI/4 + 0.2447f ) + t *( ( -0.2447f + 0.0663f ) + t*( - 0.0663f)) );
-	phi *= M_PI / 4;
-	dphi = phi + dphi;
-	if (dphi > (float) M_PI)
-		dphi -= 2 * M_PI;
-	return RADTODEG * dphi;
+   t = (y / x);
+   // atan function for 0 - 1 interval
+   dphi = t * ((M_PI / 4 + 0.2447f) + t * ((-0.2447f + 0.0663f) + t * (-0.0663f)));
+   phi *= M_PI / 4;
+   dphi = phi + dphi;
+   if (dphi > (float)M_PI)
+      dphi -= 2 * M_PI;
+   return RADTODEG * dphi;
 }
-

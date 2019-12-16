@@ -1,6 +1,6 @@
-#include "stm32f0xx.h"
 #include "config.h"
-#if defined (USE_BEESIGN)
+#include "stm32f0xx.h"
+#if defined(USE_BEESIGN)
 #include "beesign_osd.h"
 #include "menu.h"
 #include "menu_osd.h"

@@ -22,87 +22,76 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-
-
 #include "project.h"
 
+#include "defines.h"
+#include "drv_hw_i2c.h"
 #include "drv_i2c.h"
 #include "drv_softi2c.h"
-#include "drv_hw_i2c.h"
-#include "defines.h"
 
 #ifndef USE_HARDWARE_I2C
 #ifndef USE_SOFTWARE_I2C
 #ifndef USE_DUMMY_I2C
-	#define USE_SOFTWARE_I2C
+#define USE_SOFTWARE_I2C
 #endif
 #endif
 #endif
 
 int liberror = 0;
 
-void i2c_init( void)
-{
-	#ifdef USE_HARDWARE_I2C
-	hw_i2c_init();
-	#endif
+void i2c_init(void) {
+#ifdef USE_HARDWARE_I2C
+   hw_i2c_init();
+#endif
 
-	#ifdef USE_SOFTWARE_I2C
-	softi2c_init();
-	#endif
+#ifdef USE_SOFTWARE_I2C
+   softi2c_init();
+#endif
 
-	#ifdef USE_DUMMY_I2C
-	#warning I2C FUNCTIONS DISABLED
-	#endif
-
+#ifdef USE_DUMMY_I2C
+#warning I2C FUNCTIONS DISABLED
+#endif
 }
 
+void i2c_writereg(int address, int reg, int data) {
+#ifdef USE_HARDWARE_I2C
+   hw_i2c_writereg(address, reg, data);
+#endif
 
-void i2c_writereg(int address, int reg ,int data)
-{
-	#ifdef USE_HARDWARE_I2C
-	hw_i2c_writereg(address, reg , data);
-	#endif
+#ifdef USE_SOFTWARE_I2C
+   softi2c_write(address, reg, data);
+#endif
 
-	#ifdef USE_SOFTWARE_I2C
-	softi2c_write( address , reg , data);
-	#endif
+#ifdef USE_DUMMY_I2C
 
-	#ifdef USE_DUMMY_I2C
-
-	#endif
+#endif
 }
 
+int i2c_readdata(int address, int reg, int *data, int size) {
+#ifdef USE_HARDWARE_I2C
+   return hw_i2c_readdata(address, reg, data, size);
+#endif
 
-int i2c_readdata(int address, int reg, int *data, int size )
-{
-	#ifdef USE_HARDWARE_I2C
-	return hw_i2c_readdata(address, reg, data, size);
-	#endif
+#ifdef USE_SOFTWARE_I2C
+   softi2c_readdata(address, reg, data, size);
+   return 1;
+#endif
 
-	#ifdef USE_SOFTWARE_I2C
-	softi2c_readdata(address, reg, data, size );
-	return 1;
-	#endif
-
-	#ifdef USE_DUMMY_I2C
-	return 1;
-	#endif
+#ifdef USE_DUMMY_I2C
+   return 1;
+#endif
 }
 
-int i2c_readreg(int address, int reg )
-{
-	#ifdef USE_HARDWARE_I2C
-	return hw_i2c_readreg(address, reg);
-	#endif
+int i2c_readreg(int address, int reg) {
+#ifdef USE_HARDWARE_I2C
+   return hw_i2c_readreg(address, reg);
+#endif
 
-	#ifdef USE_SOFTWARE_I2C
-	return softi2c_read(address, reg);
-	#endif
+#ifdef USE_SOFTWARE_I2C
+   return softi2c_read(address, reg);
+#endif
 
-	#ifdef USE_DUMMY_I2C
-	return 255;
-	#endif
+#ifdef USE_DUMMY_I2C
+   return 255;
+#endif
 }
-
-
