@@ -247,13 +247,18 @@ void bsSetOsdMode(uint8_t mode, uint8_t cmd) {
     beesignSend(BEESIGN_O_SET_MODE, 1, &mode, cmd);
 }
 
-void bsSetMiniLayout(uint8_t VolPostion, uint8_t RssiPostion, uint8_t NamePostion, uint8_t CurPostion, uint8_t cmd) {
-    uint8_t layoutData[4] = {VolPostion, RssiPostion, NamePostion, CurPostion};
-    bsDevice.osd.voltagePosition = VolPostion;
-    bsDevice.osd.rssiPosition = RssiPostion;
-    bsDevice.osd.namePosition = NamePostion;
-    bsDevice.osd.currentPosition = CurPostion;
-    beesignSend(BEESIGN_O_SET_LAYOUT, 4, layoutData, cmd);
+void bsSetMiniLayout(uint8_t VolPostion, uint8_t RssiPostion, uint8_t NamePostion, uint8_t CurPostion, uint8_t FModePosition, uint8_t FTimePosition, uint8_t VtxPosition, uint8_t cmd) {
+   // uint8_t layoutData[4] = {VolPostion, RssiPostion, NamePostion, CurPostion};
+   uint8_t layoutData[7] = {VolPostion, RssiPostion, NamePostion, CurPostion, FModePosition, FTimePosition, VtxPosition};
+   // uint8_t layoutData[7] = {VolPostion, RssiPostion, NamePostion, CurPostion, 0, 0, 0};
+   bsDevice.osd.voltagePosition = VolPostion;
+   bsDevice.osd.rssiPosition = RssiPostion;
+   bsDevice.osd.namePosition = NamePostion;
+   bsDevice.osd.currentPosition = CurPostion;
+   bsDevice.osd.fmodePosition = FModePosition;
+   bsDevice.osd.ftimePosition = FTimePosition;
+   bsDevice.osd.vtxPosition = VtxPosition;
+   beesignSend(BEESIGN_O_SET_LAYOUT, 7, layoutData, cmd);
 }
 
 void bsSetOsdHosOffset(uint8_t offset, uint8_t cmd) {
@@ -468,7 +473,7 @@ void beesignInit(void) {
     }
         bsSetOsdMode(BEESIGN_OSD_MODE_MINI, BEESIGN_CMD_SEND);
         delay(50000);
-        bsSetMiniLayout(bsDevice.osd.voltagePosition, bsDevice.osd.rssiPosition, bsDevice.osd.namePosition, 0, BEESIGN_CMD_SEND);
+        bsSetMiniLayout(bsDevice.osd.voltagePosition, bsDevice.osd.rssiPosition, bsDevice.osd.namePosition, 0, 0,0,0, BEESIGN_CMD_SEND);
         delay(50000);
         bsSetName(bsDevice.others.name, 8, BEESIGN_CMD_SEND);
         delay(50000);

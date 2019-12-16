@@ -172,6 +172,9 @@ typedef struct beeSignDeviceOsd_s {
     uint8_t rssiPosition;
     uint8_t namePosition;
     uint8_t currentPosition;
+    uint8_t fmodePosition;
+    uint8_t ftimePosition;
+    uint8_t vtxPosition;
 } beeSignDeviceOsd_t;
 
 typedef struct beeSignDeviceOthers_s {
@@ -199,7 +202,7 @@ void bsSetName(char *name, uint8_t len, uint8_t cmd);
 void bsSaveSetting(uint8_t cmd);
 
 void bsSetOsdMode(uint8_t mode, uint8_t cmd);
-void bsSetMiniLayout(uint8_t VolPostion, uint8_t RssiPostion, uint8_t NamePostion, uint8_t CurPostion, uint8_t cmd);
+void bsSetMiniLayout(uint8_t VolPostion, uint8_t RssiPostion, uint8_t NamePostion, uint8_t CurPostion, uint8_t FModePosition, uint8_t FTimePosition, uint8_t VtxPosition, uint8_t cmd);
 void bsClearDispaly(uint8_t cmd);
 void bsSetDisplayOneRow(uint8_t x, uint8_t y, const char *buff, uint8_t cmd);
 

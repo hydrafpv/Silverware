@@ -178,6 +178,14 @@ if ( rx_bind_enable ){
     writeword(61, beesign_temp);
     beesign_temp = rcCmdHorizon;
     writeword(62, beesign_temp);
+    beesign_temp = bsDevice.osd.currentPosition;
+    beesign_temp <<= 8;
+    beesign_temp |= bsDevice.osd.fmodePosition;
+    beesign_temp <<= 8;
+    beesign_temp |= bsDevice.osd.ftimePosition;
+    beesign_temp <<= 8;
+    beesign_temp |= bsDevice.osd.vtxPosition;
+    writeword(63, beesign_temp);
 #endif
     writeword(255, FMC_HEADER);
     
@@ -299,6 +307,12 @@ extern int rx_bind_enable;
     rcCmdRace = beesign_temp;
     beesign_temp = fmc_read(62);
     rcCmdHorizon = beesign_temp;
+    beesign_temp = fmc_read(63);
+    bsDevice.osd.currentPosition = beesign_temp >> 24;
+    bsDevice.osd.fmodePosition = beesign_temp >> 16;
+    bsDevice.osd.ftimePosition = beesign_temp >> 8;
+    bsDevice.osd.vtxPosition = beesign_temp;
+
 #endif
 
     }

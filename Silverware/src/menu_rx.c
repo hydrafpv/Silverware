@@ -7,7 +7,6 @@
 #include "defines.h"
 #include "config.h"
 
-#if defined (USE_BEESIGN)
 extern int channels[9];
 static int lastChannels[9] = {0xFF};
 #if defined(RX_DSMX_2048) || defined(RX_DSMX_1024)  // DSM TAER
@@ -70,5 +69,4 @@ const menu_t rxMenu = {
     .onExit = rxMenuExitFun,
     .entries = rxMenuEntries
 };
-#endif
 #endif
