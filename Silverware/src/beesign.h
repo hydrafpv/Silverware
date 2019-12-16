@@ -200,7 +200,7 @@ void bsSetName(char *name, uint8_t len, uint8_t cmd);
 void bsSaveSetting(uint8_t cmd);
 
 void bsSetOsdMode(uint8_t mode, uint8_t cmd);
-void bsSetMiniLayout(uint8_t VolPostion, uint8_t RssiPostion, uint8_t NamePostion, uint8_t CurPostion, uint8_t FModePosition, uint8_t FTimePosition, uint8_t VtxPosition, uint8_t cmd);
+void bsSetMiniLayout(uint8_t VolPos, uint8_t RssiPos, uint8_t NamePos, uint8_t CurPos, uint8_t FModePos, uint8_t FTimePos, uint8_t VtxPos, uint8_t cmd);
 void bsClearDispaly(uint8_t cmd);
 void bsSetDisplayOneRow(uint8_t x, uint8_t y, const char *buff, uint8_t cmd);
 

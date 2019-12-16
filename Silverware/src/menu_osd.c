@@ -19,12 +19,12 @@ static uint8_t osd_lastMenuFTimePos = 0xFF;
 static uint8_t osd_menuVtxPos = 0;
 static uint8_t osd_lastMenuVtxPos = 0xFF;
 
-static const menuTab_t bsOsdEntryVolPos = {&osd_menuVolPos, &osd_lastMenuVolPos, OSD_POSTION_COUNT - 1, &osdPostionName[1]};
-static const menuTab_t bsOsdEntryRssiPos = {&osd_menuRssiPos, &osd_lastMenuRssiPos, OSD_POSTION_COUNT - 1, &osdPostionName[1]};
-static const menuTab_t bsOsdEntryNamePos = {&osd_menuNamePos, &osd_lastMenuNamePos, OSD_POSTION_COUNT - 1, &osdPostionName[1]};
-static const menuTab_t bsOsdEntryFModePos = {&osd_menuFModePos, &osd_lastMenuFModePos, OSD_POSTION_COUNT - 1, &osdPostionName[1]};
-static const menuTab_t bsOsdEntryFTimePos = {&osd_menuFTimePos, &osd_lastMenuFTimePos, OSD_POSTION_COUNT - 1, &osdPostionName[1]};
-static const menuTab_t bsOsdEntryVtxPos = {&osd_menuVtxPos, &osd_lastMenuVtxPos, OSD_POSTION_COUNT - 1, &osdPostionName[1]};
+static const menuTab_t bsOsdEntryVolPos = {&osd_menuVolPos, &osd_lastMenuVolPos, OSD_POSTION_COUNT - 1, &osdPositionName[1]};
+static const menuTab_t bsOsdEntryRssiPos = {&osd_menuRssiPos, &osd_lastMenuRssiPos, OSD_POSTION_COUNT - 1, &osdPositionName[1]};
+static const menuTab_t bsOsdEntryNamePos = {&osd_menuNamePos, &osd_lastMenuNamePos, OSD_POSTION_COUNT - 1, &osdPositionName[1]};
+static const menuTab_t bsOsdEntryFModePos = {&osd_menuFModePos, &osd_lastMenuFModePos, OSD_POSTION_COUNT - 1, &osdPositionName[1]};
+static const menuTab_t bsOsdEntryFTimePos = {&osd_menuFTimePos, &osd_lastMenuFTimePos, OSD_POSTION_COUNT - 1, &osdPositionName[1]};
+static const menuTab_t bsOsdEntryVtxPos = {&osd_menuVtxPos, &osd_lastMenuVtxPos, OSD_POSTION_COUNT - 1, &osdPositionName[1]};
 
 static void osdMenuExitFun(void) {
    osd_lastMenuVolPos = 0xFF;

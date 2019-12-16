@@ -4,7 +4,7 @@
 #include "beesign.h"
 #include "beesign_osd.h"
 
-const char *const osdPostionName[] = {
+const char *const osdPositionName[] = {
     "-",
     "OFF",
     "1",

@@ -6,7 +6,7 @@
 
 #define OSD_POSTION_COUNT 31
 
-extern const char *const osdPostionName[];
+extern const char *const osdPositionName[];
 
 void bsOsdSetMiniPostion(uint8_t volPostion, uint8_t rssiPostion, uint8_t namePostion, uint8_t fmodePosition, uint8_t ftimePosition, uint8_t vtxPosition);
 
