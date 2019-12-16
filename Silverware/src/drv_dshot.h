@@ -144,7 +144,6 @@
 #endif
 // motor2
 
-
 #ifdef MOTOR2_PIN_PB1
 #define DSHOT_PIN_2 GPIO_Pin_1
 #define DSHOT_PORT_2 GPIOB

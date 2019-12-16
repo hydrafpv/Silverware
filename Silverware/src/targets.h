@@ -90,7 +90,7 @@
 #define SENSOR_ROTATE_90_CW
 
 // SPI PINS DEFINITONS & RADIO
-#if defined(RX_SBUS) || defined(RX_DSMX_2048) || defined(RX_DSM2_1024) || defined(RX_CRSF) || defined(RX_IBUS) 
+#if defined(RX_SBUS) || defined(RX_DSMX_2048) || defined(RX_DSM2_1024) || defined(RX_CRSF) || defined(RX_IBUS)
 #define SERIAL_RX_SWD
 #define SERIAL_RX_SPEKBIND_BINDTOOL_PIN GPIO_Pin_3
 #define SERIAL_RX_PIN GPIO_Pin_14
@@ -221,7 +221,7 @@
 #define GYRO_ID_1 0x68
 #define GYRO_ID_2 0x98 // new id
 #define GYRO_ID_3 0x78
-#define GYRO_ID_4 0x72 
+#define GYRO_ID_4 0x72
 #define SENSOR_ROTATE_90_CCW
 
 // SPI PINS DEFINITONS & RADIO
@@ -276,7 +276,6 @@
 #define MOTOR2_PIN_PA4
 #define MOTOR3_PIN_PA6
 #endif
-
 
 #ifdef WolfHoo_Brushless
 #define BRUSHLESS_TARGET
@@ -340,7 +339,6 @@
 #define MOTOR2_PIN_PB1
 #define MOTOR3_PIN_PA7
 #endif
-
 
 #ifdef Silverlite_Brushless
 #define BRUSHLESS_TARGET
