@@ -22,8 +22,8 @@ extern int rx_rssi;
 #define POLY (0xB2)
 #define VOL_AND_RSSI_SEND_COUNT 500
 
-#define BEESGIN_GET_FC_VOLTAGE() (vbattfilt * 10)
-#define BEESGIN_GET_FC_RSSI() (rx_rssi / 20.47)
+#define BEESIGN_GET_FC_VOLTAGE() (vbattfilt * 10)
+#define BEESIGN_GET_FC_RSSI() (rx_rssi / 20.47)
 
 #define CALC_CRC(crc, data)                               \
    do {                                                   \
@@ -498,8 +498,14 @@ void beesignTask(void) {
    }
    if (taskCountTime >= VOL_AND_RSSI_SEND_COUNT && getMenuState() == 0) { //cycles executed once
       taskCountTime = 0;
-      bsSetVol((uint16_t)(BEESGIN_GET_FC_VOLTAGE()), BEESIGN_CMD_ADD_BUFF);
-      bsSetRssi((uint8_t)(BEESGIN_GET_FC_RSSI()), BEESIGN_CMD_ADD_BUFF);
+      bsSetVol((uint16_t)(BEESIGN_GET_FC_VOLTAGE()), BEESIGN_CMD_ADD_BUFF);
+      // clamp to 99: is RSSI comes back as 100, the OSD presents "00" which can be misinterpreted as "no signal"
+      // max value of "rx_rssi" is 0x07FF, 2047. The BEESIGN macro divides by "20.47", so a value of "100" is possible.
+      uint8_t rssi = BEESIGN_GET_FC_RSSI();
+      if (rssi > 99) {
+         rssi = 99;
+      }
+      bsSetRssi(rssi, BEESIGN_CMD_ADD_BUFF);
    }
 }
 #endif
