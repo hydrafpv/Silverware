@@ -62,9 +62,9 @@ static menuEntry_t osdMenuEntries[] = {
     {"VOL", menu_Tab, NULL, &bsOsdEntryVolPos, 0},
     {"RSSI", menu_Tab, NULL, &bsOsdEntryRssiPos, 0},
     {"NAME", menu_Tab, NULL, &bsOsdEntryNamePos, 0},
-    // {"MODE", menu_Tab, NULL, &bsOsdEntryFModePos, 0},
-    // {"TIME", menu_Tab, NULL, &bsOsdEntryFTimePos, 0},
-    // {"VTX", menu_Tab, NULL, &bsOsdEntryVtxPos, 0},
+    {"MODE", menu_Tab, NULL, &bsOsdEntryFModePos, 0},
+    {"TIME", menu_Tab, NULL, &bsOsdEntryFTimePos, 0},
+    {"VTX", menu_Tab, NULL, &bsOsdEntryVtxPos, 0},
     {"EXIT", menu_Back, NULL, NULL, 0},
     {NULL, menu_End, NULL, NULL, 0}};
 

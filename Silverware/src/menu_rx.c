@@ -45,9 +45,9 @@ static menuEntry_t rxMenuEntries[] = {
     {"THR", menu_Uint16, NULL, &(menuUint16_t){(uint16_t *)(&THR_VAILE), (uint16_t *)(&THR_LAST_VAILE), 0, 2000, 0}, DYNAMIC},
     {"YAW", menu_Uint16, NULL, &(menuUint16_t){(uint16_t *)(&YAW_VAILE), (uint16_t *)(&YAW_LAST_VAILE), 0, 2000, 0}, DYNAMIC},
     {"AUX1", menu_Uint16, NULL, &(menuUint16_t){(uint16_t *)(&AUX1_VAILE), (uint16_t *)(&AUX1_LAST_VAILE), 0, 2000, 0}, DYNAMIC},
-    {"AUX2", menu_Uint16, NULL, &(menuUint16_t){(uint16_t *)(&AUX2_VAILE), (uint16_t *)(&AUX2_LAST_VAILE), 0, 2000, 0}, DYNAMIC},
-    {"AUX3", menu_Uint16, NULL, &(menuUint16_t){(uint16_t *)(&AUX3_VAILE), (uint16_t *)(&AUX3_LAST_VAILE), 0, 2000, 0}, DYNAMIC},
-    {"AUX4", menu_Uint16, NULL, &(menuUint16_t){(uint16_t *)(&AUX4_VAILE), (uint16_t *)(&AUX4_LAST_VAILE), 0, 2000, 0}, DYNAMIC},
+    // {"AUX2", menu_Uint16, NULL, &(menuUint16_t){(uint16_t *)(&AUX2_VAILE), (uint16_t *)(&AUX2_LAST_VAILE), 0, 2000, 0}, DYNAMIC},
+    // {"AUX3", menu_Uint16, NULL, &(menuUint16_t){(uint16_t *)(&AUX3_VAILE), (uint16_t *)(&AUX3_LAST_VAILE), 0, 2000, 0}, DYNAMIC},
+    // {"AUX4", menu_Uint16, NULL, &(menuUint16_t){(uint16_t *)(&AUX4_VAILE), (uint16_t *)(&AUX4_LAST_VAILE), 0, 2000, 0}, DYNAMIC},
     {"EXIT", menu_Back, NULL, NULL, 0},
     {NULL, menu_End, NULL, NULL, 0}};
 
