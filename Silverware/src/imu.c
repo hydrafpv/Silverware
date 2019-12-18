@@ -149,7 +149,7 @@ void imu_calc(void) {
    float ft = FILTERTIME;
    // extern float stickvector[3];
    if (onground == 1) { // happyhour bartender - quad is ON GROUND and disarmed
-      // ft = FASTFILTER;
+      ft = FASTFILTER;
 
    } else {
 #ifdef PREFILTER
