@@ -1,77 +1,138 @@
-
-
-//Universal pids are already loaded for 6mm and 7mm whoops by default.  Adjust pids in pid.c file for any non whoop builds.
-
-//**********************************************************************************************************************
-//***********************************************HARDWARE SELECTION*****************************************************
-
-// *************DEFINE FLIGHT CONTROLLER HARDWARE
-// *************SELECT ONLY ONE
-// *************uncomment BWHOOP define for bwhoop, bwhoop pro, E011C Santa Edition, and Beta FPV Lite Flight Controllers
-// *************uncomment E011 define for E011 flight Controller
-// *************uncomment H8mini_blue_board for the H8 mini flight controller with blue circuit board
-//#define BWHOOP
+/*******************************************************************************
+   HARDWARE SELECTION - SELECT ONLY ONE
+*******************************************************************************/
+//#define BWHOOP // bwhoop, bwhoop pro, E011C Santa Edition, and Beta FPV Lite Flight Controllers
 //#define E011
 //#define H8mini_blue_board
 //#define Alienwhoop_ZERO
 //#define Silverlite_Brushless
 #define HUMMINGBIRD
 
+// BEESIGN is NewBeeDrones VTX / OSD hardware on the HUMMINGBIRD board
+#ifdef HUMMINGBIRD
 #define USE_BEESIGN
+#endif
+/*
+   RATES & EXPO SETTINGS
 
-//**********************************************************************************************************************
-//***********************************************RATES & EXPO SETTINGS**************************************************
+   Select your preffered rate calculation format (define only one).
 
-// *************Select your preffered rate calculation format (define only one)
-#define SILVERWARE_RATES
-//#define BETAFLIGHT_RATES
+   Exponent value range: 0.00 to 1.00
+      0.00 = no exponent
+      1.00 = less sensitive near center
+*/
+//#define SILVERWARE_RATES
+#define BETAFLIGHT_RATES
 
 #ifdef SILVERWARE_RATES
-// *************rate in deg/sec
-// *************for acro mode
-#define MAX_RATE 900.0    //Roll & Pitch axis
-#define MAX_RATEYAW 600.0 //Yaw axis (used in acro and leveling modes)
-
-// *************EXPO from 0.00 to 1.00 , 0 = no exp
-// *************positive = less sensitive near center
+// Rate in deg/sec for acro mode (Roll & Pitch axis)
+#define MAX_RATE 1000.0
+// Rate in dev/sec for acro and leveling modes (Yaw axis)
+#define MAX_RATEYAW 900.0
 #define ACRO_EXPO_ROLL 0.80
 #define ACRO_EXPO_PITCH 0.80
 #define ACRO_EXPO_YAW 0.20
-
-#define ANGLE_EXPO_ROLL 0.55
+#define ANGLE_EXPO_ROLL 0.0
 #define ANGLE_EXPO_PITCH 0.0
-#define ANGLE_EXPO_YAW 0.55
+#define ANGLE_EXPO_YAW 0.1
 #endif
 
 #ifdef BETAFLIGHT_RATES
 #define BF_RC_RATE_ROLL 1.00
 #define BF_RC_RATE_PITCH 1.00
-#define BF_RC_RATE_YAW 1.00
-#define BF_SUPER_RATE_ROLL 0.70
-#define BF_SUPER_RATE_PITCH 0.70
-#define BF_SUPER_RATE_YAW 0.70
-#define BF_EXPO_ROLL 0.00
-#define BF_EXPO_PITCH 0.00
-#define BF_EXPO_YAW 0.00
+#define BF_RC_RATE_YAW 2.10
+#define BF_SUPER_RATE_ROLL 0.80
+#define BF_SUPER_RATE_PITCH 0.80
+#define BF_SUPER_RATE_YAW 0.1
+#define BF_EXPO_ROLL 0.02
+#define BF_EXPO_PITCH 0.02
+#define BF_EXPO_YAW 0.02
 #endif
 
-// *************max angle for level mode
-#define LEVEL_MAX_ANGLE 65.0f
+/*******************************************************************************
+   PIDS
+   
+   Define PIDS_P, PIDS_I, PIDS_D = { ROLL, PITCH, YAW }.
+*******************************************************************************/
 
-// ************* low rates multiplier if rates are assigned to a channel
-#define LOW_RATES_MULTI 1.0f
+// Hummingbird 6mm Plain Motors with 4 blade Eachine, Venom or any Gemfan Props
+//    Set BETA_FILTERING, TURN OFF TORQUE BOOST and disable "airmode"
+// #define PIDS_P { 19.0e-2, 19.0e-2, 9.5e-1 }
+// #define PIDS_I { 12e-1, 12e-1, 12e-1 }
+// #define PIDS_D { 8.5e-1, 8.5e-1, 6.0e-1 }
 
-// *************transmitter stick adjustable deadband for roll/pitch/yaw
-// *************.01f = 1% of stick range - comment out to disable
+// Hummingbird 6mm Black / Gold Motors with 4 blade Gemfan Props
+//    Set BETA_FILTERING
+#define PIDS_P \
+   { 21.0e-2, 21.0e-2, 10.0e-1 }
+#define PIDS_I \
+   { 12e-1, 12e-1, 12e-1 }
+#define PIDS_D \
+   { 7.9e-1, 7.9e-1, 5.5e-1 }
+
+// 6mm & 7mm Abduction Pids for whoops (Team Alienwhoop)
+//    Set ALIENWHOOP_ZERO_FILTERING or default BETA_FILTERING
+// #define PIDS_P { 21.5e-2, 21.5e-2, 10.5e-1 }
+// #define PIDS_I { 14e-1, 15e-1, 15e-1 }
+// #define PIDS_D { 7.4e-1, 7.4e-1, 5.5e-1 }
+
+// BOSS 7 with 716 motors and 46mm Props - set filtering to BETA_FILTERING and adjust pass 1 and pass 2 for KALMAN_GYRO both to 70hz, set DTERM_LPF_2ND_HZ to 120hz, disable motor filtering
+// set TORQUE_BOOST to 1.0, and add #define THROTTLE_TRANSIENT_COMPENSATION and #define THROTTLE_TRANSIENT_COMPENSATION_FACTOR 4.0
+// #define PIDS_P { 19.5e-2, 19.5e-2, 9.5e-1 }
+// #define PIDS_I { 12e-1, 12e-1, 8e-1 }
+// #define PIDS_D { 10.7e-1, 10.7e-1, 2.0e-1 }
+
+// 75mm Brushless 2s 0802 Whoop - Seems to need heavy filtering in early tests - PID_VBat Compensation must be disabled (it seems overly responsive to sag and is feeding back)
+// #define PIDS_P { 11.2e-2, 12.6e-2, 1.8e-1 }
+// #define PIDS_I { 14e-1, 15e-1, 15e-1 }
+// #define PIDS_D { 5.6e-1, 6.7e-1, 0.5e-1 }
+
+// 4in Brushless Pids - 1407 3600kv Motors, 4s - Gyro filters at 90hz, 1st order D at 70hz - PID_Vbat Comp seems ok here
+// #define PIDS_P { 9.5e-2, 12.5e-2, 2.0e-1 }
+// #define PIDS_I { 14.0e-1, 14.0e-1, 14.0e-1 }
+// #define PIDS_D { 2.3e-1, 3.3e-1, 0.5e-1 }
+
+//***************  The following tunes beyond this point are all pretty dated.  I have not built/flown/tuned any of these in a long time and there have been alot of changes.
+//***************  If your build best matches some of the specs below ... consider the tune a starting point and give me feedback/adjust as necessary.
+
+// (OLD) 6mm experimental AwesomeSauce 20000kv Pids (Team Alienwhoop) - set filtering ALIENWHOOP_ZERO_FILTERING
+// #define PIDS_P { 25.5e-2, 25.5e-2, 11.5e-1 }
+// #define PIDS_I { 20.5e-1, 20.5e-1, 16e-1 }
+// #define PIDS_D { 11.4e-1, 11.4e-1, 4.9e-1 }
+
+// (OLD) BOSS 6 & 7 - 615 and 716 motors, hm830 46mm props  - set filtering to VERY_STRONG_FILTERING
+// #define PIDS_P { 24.5e-2, 24.5e-2, 9.5e-1 }
+// #define PIDS_I { 12e-1, 12e-1, 8e-1 }
+// #define PIDS_D { 14.1e-1, 14.1e-1, 7e-1 }
+
+// (OLD) BOSS 8.0 - 816 motors, kingkong 66mm props  - set filtering to WEAK_FILTERING
+// #define PIDS_P { 26.7e-2, 26.7e-2, 9.5e-1 }
+// #define PIDS_I { 12e-1, 12e-1, 8e-1 }
+// #define PIDS_D { 16.2e-1, 16.2e-1, 7e-1 }
+
+// (OLD) BOSS 8.5 - 820 motors, kingkong 66mm props  - set filtering to STRONG_FILTERING
+// #define PIDS_P { 29.5e-2, 29.5e-2, 11.5e-1 }
+// #define PIDS_I { 12e-1, 12e-1, 12.0e-1 }
+// #define PIDS_D { 17.5e-1, 17.5e-1, 7e-1 }
+
+// Max angle for level mode
+#define LEVEL_MAX_ANGLE 85.0f
+
+// Low rates multiplier if rates are assigned to a channel
+#define LOW_RATES_MULTI 0.0f
+
+// Transmitter stick adjustable deadband for roll/pitch/yaw
+// *** .01f = 1% of stick range - comment out to disable
 #define STICKS_DEADBAND .01f
 
-//**********************************************************************************************************************
-//***********************************************RECEIVER SETTINGS******************************************************
+/*******************************************************************************
+   RECEIVER SETTINGS
+*******************************************************************************/
 
 // *************Radio protocol selection
 // *************select only one
 #define RX_SBUS
-//#define RX_CRSF                                           //Requires tbs firmware v2.88 or newer for failsafe to operate properly
+//#define RX_CRSF   //Requires tbs firmware v2.88 or newer for failsafe to operate properly
 //#define RX_DSMX_2048
 //#define RX_DSM2_1024
 //#define RX_IBUS
@@ -84,22 +145,24 @@
 //#define USE_DEVO
 #define USE_MULTI
 
-// *******************************SWITCH SELECTION*****************************
-// *************CHAN_ON - on always ( all protocols)
-// *************CHAN_OFF - off always ( all protocols)
-// *************Aux channels are selectable as CHAN_5 through CHAN_12 for DEVO and through CHAN_13 (but no CHAN_11) for MULTIMODULE users
-// *************Toy transmitter mapping is CHAN_5 (rates button), CHAN_6 (stick gestures RRD/LLD),
-//**************CHAN_7 (headfree button), CHAN_8 (roll trim buttons), CHAN_9 (pitch trim buttons)
+/*******************************************************************************
+   SWITCH SELECTION
+*******************************************************************************/
+//*** CHAN_ON - on always ( all protocols)
+//*** CHAN_OFF - off always ( all protocols)
+//*** Aux channels are selectable as CHAN_5 through CHAN_12 for DEVO and through CHAN_13 (but no CHAN_11) for MULTIMODULE users
+//*** Toy transmitter mapping is CHAN_5 (rates button), CHAN_6 (stick gestures RRD/LLD),
+//*** CHAN_7 (headfree button), CHAN_8 (roll trim buttons), CHAN_9 (pitch trim buttons)
 
-//*************Arm switch and Idle Up switch (idle up will behave like betaflight airmode)
-//*************comment out to disable arming or idle up features ONLY if not wanted.  Other features set to CHAN_OFF to disable
+//*** Arm switch and Idle Up switch (idle up will behave like betaflight airmode)
+//*** Comment out to disable arming or idle up features ONLY if not wanted.  Other features set to CHAN_OFF to disable
 
-//*************Assign feature to auxiliary channel.  NOTE - Switching on LEVELMODE is required for any leveling modes to
-//*************be active.  With LEVELMODE active - MCU will apply RACEMODE if racemode channel is on, HORIZON if horizon
-//*************channel is on, or racemodeHORIZON if both channels are on - and will be standard LEVELMODE if neither
-//*************racemode or horizon are switched on.
+//*** Assign feature to auxiliary channel.  NOTE - Switching on LEVELMODE is required for any leveling modes to
+//*** be active.  With LEVELMODE active - MCU will apply RACEMODE if racemode channel is on, HORIZON if horizon
+//*** channel is on, or racemodeHORIZON if both channels are on - and will be standard LEVELMODE if neither
+//*** racemode or horizon are switched on.
 #define ARMING CHAN_5
-#define IDLE_UP CHAN_5
+#define IDLE_UP CHAN_ON
 #define LEVELMODE CHAN_6
 #define RACEMODE CHAN_7
 #define HORIZON CHAN_8
@@ -109,24 +172,25 @@
 #define LEDS_ON CH_ON
 #define ALTITUDE_MODE CHAN_9
 
-// *************switch for fpv / other, requires fet
-// *************comment out to disable
+//*** switch for fpv / other, requires fet
+//*** comment out to disable
 //#define FPV_ON CHAN_ON
 
-// *************enable buzzer functionality
-// *************external buzzer requires pin assignment in hardware.h before defining below
-// *************change channel assignment from CHAN_OFF to a numbered aux switch if you want switch control
-// *************if no channel is assigned but buzzer is set to CHAN_ON - buzzer will activate on LVC and FAILSAFE.
+//*** enable buzzer functionality
+//*** external buzzer requires pin assignment in hardware.h before defining below
+//*** change channel assignment from CHAN_OFF to a numbered aux switch if you want switch control
+//*** if no channel is assigned but buzzer is set to CHAN_ON - buzzer will activate on LVC and FAILSAFE.
 //#define BUZZER_ENABLE CHAN_OFF
 
-// *************start in level mode for toy tx.  Must comment out STICK_TRAVEL_CHECK to assign CH_AUX1 to an aux feature
+//*** start in level mode for toy tx.  Must comment out STICK_TRAVEL_CHECK to assign CH_AUX1 to an aux feature
 //#define AUX1_START_ON
 
-// *************automatically remove center bias in toy tx ( needs throttle off for 1 second )
+//*** automatically remove center bias in toy tx ( needs throttle off for 1 second )
 //#define STOCK_TX_AUTOCENTER
 
-//**********************************************************************************************************************
-//***********************************************VOLTAGE SETTINGS*******************************************************
+/*******************************************************************************
+   VOLTAGE SETTINGS
+*******************************************************************************/
 
 // ************* Set your lipo cell count to override auto cell count detect logic
 //#define LIPO_CELL_COUNT 1
@@ -166,30 +230,33 @@
 //#define REPORTED_TELEMETRY_VOLTAGE_LO 3.60
 //#define REPORTED_TELEMETRY_VOLTAGE_HI 4.20
 
-//**********************************************************************************************************************
-//***********************************************FILTER SETTINGS********************************************************
+/*******************************************************************************
+   FILTER SETTINGS
 
-// *************The following is the new "beta" testing filter set.  Taking lesson from betaflight ... it seems very effective to stack 1st order filters
-// *************and gives outstanding adjustability as you can stagger the first and second passes at different values as opposed to being constrained by
-// ************* a second order filter at a single cut frequency.  Go test and see what you like, and report back if you feel so inclined.  I have not actually staggered my
-// ************* filters yet and the filters listed below are what I am flying on my whoop so far.  For my boss 7, I am changing both pass 1 and 2 to HZ_70, and
-// ************* setting the D 2nd filter to 120hz.  FYI, whoops seem to have one noise peak somewhere around 150 to 200hz and another one closer to 400 to 500hz.
-// *************  For my brushless 4" I am running one gyro pass at 90hz, the second gyro pass at 140hz, and the 1st order D filter at 70hz. On all of these crafts I have
-// *************  been able to totally eliminate the need for any motor output filtering.  It will remain in the code as an available option for now, but I hope to be able to remove
-// *************  it completely from the code soon if testing continues to go well.  My thoughts on motor output filtering are here https://community.micro-motor-warehouse.com/t/notfastenuf-e011-bwhoop-silverware-fork/5501/1388?u=notfastenuf
-// *************  To adjust your filters if you so desire - use these basic observations I have made:  Noise will be obvious by motors that dont want to throttle down immediately or at all.  Too much filtering will be obvious
-// ************* by propwash and eventually P oscillations if you really push it too far
-// *************
-// *************  At this point I feel very optimistic about this gyro filter configuration. I hope we can all work together to establish the best whoop defaults possible.
-// *************  If you want to help, try to tweak in the values on pass 1 and 2 for something that runs 6 and 7mm really clean.  Go slap on some bent
-// ************* props, or find some of those garbage off balance 3 blade abominations that the stock zero tune hates so much.  Lets see what we can make possible and find the limits.
-// *************  Lets also see if in the end - can we say that this flies better than the previous stock filter setup.  Remember, tolerating more bent or bad props is great but
-// *************  only if it doesnt compromise the feel or performance we are used to when the equipment is good.  Personally I think this already feels better and handles better ... but I have only just begun exploring different filtering values.
-// ************* Feel free to unselect BETA_FILTERING and return to ALIENWHOOP_ZERO_FILTERING here for comparison to stock.  I think/hope that this will work well enough that even the
-// ************* prefilled filter sets can be eventually abandoned in favor of one decent set of defaults that fly most everything very well
-// *************
-// *************  FINAL NOTE: If you want to try running only one gyro pass, you can comment out either pass one or pass two.  Next revision will have split 1st order D term filter
-// *************  passes just like the gyro in place of 2nd order filtering.      Thanks - NFE
+   The following is the new "beta" testing filter set.  Taking lesson from betaflight ... it seems very effective to stack 1st order filters
+   and gives outstanding adjustability as you can stagger the first and second passes at different values as opposed to being constrained by
+   a second order filter at a single cut frequency.  Go test and see what you like, and report back if you feel so inclined.  I have not actually staggered my
+   filters yet and the filters listed below are what I am flying on my whoop so far.  For my boss 7, I am changing both pass 1 and 2 to HZ_70, and
+   setting the D 2nd filter to 120hz.  FYI, whoops seem to have one noise peak somewhere around 150 to 200hz and another one closer to 400 to 500hz.
+   For my brushless 4" I am running one gyro pass at 90hz, the second gyro pass at 140hz, and the 1st order D filter at 70hz. On all of these crafts I have
+   been able to totally eliminate the need for any motor output filtering.  It will remain in the code as an available option for now, but I hope to be able to remove
+   it completely from the code soon if testing continues to go well.  My thoughts on motor output filtering are here https://community.micro-motor-warehouse.com/t/notfastenuf-e011-bwhoop-silverware-fork/5501/1388?u=notfastenuf
+   To adjust your filters if you so desire - use these basic observations I have made:  Noise will be obvious by motors that dont want to throttle down immediately or at all.  Too much filtering will be obvious
+   by propwash and eventually P oscillations if you really push it too far
+
+   At this point I feel very optimistic about this gyro filter configuration. I hope we can all work together to establish the best whoop defaults possible.
+   If you want to help, try to tweak in the values on pass 1 and 2 for something that runs 6 and 7mm really clean.  Go slap on some bent
+   props, or find some of those garbage off balance 3 blade abominations that the stock zero tune hates so much.  Lets see what we can make possible and find the limits.
+   Lets also see if in the end - can we say that this flies better than the previous stock filter setup.  Remember, tolerating more bent or bad props is great but
+   only if it doesnt compromise the feel or performance we are used to when the equipment is good.  Personally I think this already feels better and handles better ... but I have only just begun exploring different filtering values.
+   Feel free to unselect BETA_FILTERING and return to ALIENWHOOP_ZERO_FILTERING here for comparison to stock.  I think/hope that this will work well enough that even the
+   prefilled filter sets can be eventually abandoned in favor of one decent set of defaults that fly most everything very well
+
+   FINAL NOTE: If you want to try running only one gyro pass, you can comment out either pass one or pass two.  Next revision will have split 1st order D term filter
+   passes just like the gyro in place of 2nd order filtering.
+
+   Thanks - NFE
+*******************************************************************************/
 
 //#define WEAK_FILTERING    //PJC  Alienwhoop was on by default
 //#define STRONG_FILTERING
@@ -199,16 +266,16 @@
 
 #ifdef BETA_FILTERING //*** ABOVE 100 ADJUST IN INCRIMENTS OF 20, BELOW 100 ADJUST IN INCRIMENTS OF 10, nothing coded beyond 500hz
 
-//Select Gyro Filter Type *** Select Only One type
+//*** Select Gyro Filter Type *** Select Only One type
 #define KALMAN_GYRO
 //#define PT1_GYRO
 
 //Select Gyro Filter Cut Frequency
-#define GYRO_FILTER_PASS1 HZ_90
-#define GYRO_FILTER_PASS2 HZ_90
+// #define GYRO_FILTER_PASS1 HZ_90
+// #define GYRO_FILTER_PASS2 HZ_90
 
 //Select D Term Filter Cut Frequency *** Select Only one
-#define DTERM_LPF_2ND_HZ 100
+#define DTERM_LPF_2ND_HZ 300
 //#define DTERM_LPF_1ST_HZ 70
 
 //Select Motor Filter Type  (I am no longer using this)
@@ -216,8 +283,9 @@
 
 #endif
 
-//**********************************************************************************************************************
-//***********************************************MOTOR OUTPUT SETTINGS**************************************************
+/*******************************************************************************
+   MOTOR OUTPUT SETTINGS
+*******************************************************************************/
 
 // minimum motor output: *for brushed a % value (0.0 - 100.0)   *for brushless this sets digital idle % for DSHOT for any selection
 #define MOTOR_MIN_COMMAND 5.0
@@ -258,8 +326,9 @@
 //**************joelucid's transient windup protection.  Removes roll and pitch bounce back after flips
 #define TRANSIENT_WINDUP_PROTECTION
 
-//**********************************************************************************************************************
-//***********************************************ADDITIONAL FEATURES****************************************************
+/*******************************************************************************
+   ADDITIONAL FEATURES
+*******************************************************************************/
 
 // *************lost quad beeps using motors (30 sec timeout) - pulses motors after timeout period to help find a lost model
 //#define MOTOR_BEEPS
@@ -317,25 +386,23 @@
 //#define ANALOG_Y_I   CHAN_14
 //#define ANALOG_Y_D   CHAN_15
 
-//#############################################################################################################################
-//#############################################################################################################################
-// debug / other things
-// things that should not be usually changed
-//#############################################################################################################################
-//#############################################################################################################################
+/*******************************************************************************
+   Debug / other things
+   ... things that should not be usually changed
+*******************************************************************************/
 
 // *************DEFINE FLIGHT CONTROLLER HARDWARE HAS BEEN MODIFIED FOR BRUSHLESS CONVERSION   **WARNING**DO NOT ENABLE DSHOT DMA ESC DRIVER WITH BRUSHED MOTORS ATTACHED**
 //#define BRUSHLESS_CONVERSION
 
-//enables use of stick accelerator and stick transition for d term lpf 1 & 2
+// Enables use of stick accelerator and stick transition for d term lpf 1 & 2
 #define ADVANCED_PID_CONTROLLER
 
-//Throttle must drop below this value if arming feature is enabled for arming to take place.  MIX_INCREASE_THROTTLE_3 if enabled
-//will also not activate on the ground untill this threshold is passed during takeoff for safety and better staging behavior.
+// Throttle must drop below this value if arming feature is enabled for arming to take place.  MIX_INCREASE_THROTTLE_3 if enabled
+// will also not activate on the ground untill this threshold is passed during takeoff for safety and better staging behavior.
 #define THROTTLE_SAFETY .10f
 
-//Activating this setting makes the accelerometer less prone to drift or yaw slow down in angle mode but more likely to become confused in crashes or impacts.  Only use if necessary
-//#define ACCELEROMETER_DRIFT_FIX
+// Activating this setting makes the accelerometer less prone to drift or yaw slow down in angle mode but more likely to become confused in crashes or impacts.  Only use if necessary
+// #define ACCELEROMETER_DRIFT_FIX
 
 // level mode "manual" trims ( in degrees)
 // pitch positive forward
@@ -344,19 +411,19 @@
 #define TRIM_ROLL 0.0
 
 // flash saving features
-//#define DISABLE_GESTURES2
+// #define DISABLE_GESTURES2
 
 // disable motors for testing
-//#define NOMOTORS
+// #define NOMOTORS
 
 // throttle direct to motors for thrust measure
-//#define MOTORS_TO_THROTTLE
+// #define MOTORS_TO_THROTTLE
 
 // throttle direct to motors for thrust measure as a flight mode
-//#define MOTORS_TO_THROTTLE_MODE CHAN_OFF
+// #define MOTORS_TO_THROTTLE_MODE CHAN_OFF
 
 // rxdebug structure
-//#define RXDEBUG
+// #define RXDEBUG
 
 // debug things ( debug struct and other)
-//#define DEBUG
+// #define DEBUG

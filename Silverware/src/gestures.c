@@ -57,8 +57,8 @@ void gestures(void) {
          pid_init();
 #endif // USE_ANALOG_AUX
 
-#endif // FLASH_SAVE1
-         // reset loop time
+#endif // FLASH_SAVE1 \
+    // reset loop time
          extern unsigned long lastlooptime;
          lastlooptime = gettime();
       }

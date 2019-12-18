@@ -199,7 +199,7 @@
 #endif
 #endif
 
-#define GYRO_LOW_PASS_FILTER 0
+#define GYRO_LOW_PASS_FILTER 3
 
 #define DISABLE_FLIP_SEQUENCER //**************todo adapt into turtle mode
 #define STARTFLIP CHAN_OFF     //**************todo adapt into turtle mode
@@ -281,8 +281,8 @@
 //#define MIX_INCREASE_THROTTLE
 
 //#define MIX_LOWER_THROTTLE_3
-#define MIX_INCREASE_THROTTLE_3
-#define MIX_THROTTLE_INCREASE_MAX 0.2f
+// #define MIX_INCREASE_THROTTLE_3
+// #define MIX_THROTTLE_INCREASE_MAX 0.2f
 #endif
 
 //
