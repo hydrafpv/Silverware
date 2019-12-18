@@ -125,6 +125,8 @@
 #define BEESIGN_M_SET_CUR 0x75
 #define BEESIGN_M_SET_RSSI 0x76
 #define BEESIGN_M_SAVE_SETTING 0x77
+#define BEESIGN_M_SET_FLY_MODE 0x78
+#define BEESIGN_M_SET_ARM_STATUS 0x79
 
 #define BEESIGN_VOLTAGE_ADC 0
 #define BEESIGN_VOLTAGE_EXT 1
@@ -198,6 +200,7 @@ uint8_t bsValidateFreq(uint16_t freq);
 void bsSetFreq(uint16_t freq, uint8_t cmd);
 void bsSetName(char *name, uint8_t len, uint8_t cmd);
 void bsSaveSetting(uint8_t cmd);
+void bsSetArmed(uint8_t value, uint8_t cmd);
 
 void bsSetOsdMode(uint8_t mode, uint8_t cmd);
 void bsSetMiniLayout(uint8_t VolPos, uint8_t RssiPos, uint8_t NamePos, uint8_t CurPos, uint8_t FModePos, uint8_t FTimePos, uint8_t VtxPos, uint8_t cmd);

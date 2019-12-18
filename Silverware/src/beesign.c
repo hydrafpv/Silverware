@@ -1,10 +1,11 @@
 #include "config.h"
-#include "stm32f0xx.h"
 #if defined(USE_BEESIGN)
 #include "beesign.h"
 #include "drv_softserial.h"
 #include "menu.h"
 #include "stdlib.h"
+#include "stick_command.h"
+#include "stm32f0xx.h"
 #include "string.h"
 
 extern float vbattfilt;
@@ -191,12 +192,10 @@ void bsSetBandAndChannel(uint8_t band, uint8_t channel, uint8_t cmd) {
       return;
    uint8_t deviceChannel = BS_BANDCHAN_TO_DEVICE_CHVAL(band, channel);
    bsDevice.vtx.channel = deviceChannel;
-   // bsDevice.freq = vtx58frequencyTable[band][channel];
    beesignSend(BEESIGN_V_SET_CHAN, 1, &deviceChannel, cmd);
 }
 
 void bsSetPower(uint8_t index, uint8_t cmd) {
-
    if (index > BEESIGN_POWER_COUNT) {
       return;
    }
@@ -448,6 +447,10 @@ void bsSetRssi(uint8_t value, uint8_t cmd) {
    beesignSend(BEESIGN_M_SET_RSSI, 1, &value, cmd);
 }
 
+void bsSetArmed(uint8_t value, uint8_t cmd) {
+   beesignSend(BEESIGN_M_SET_ARM_STATUS, 1, &value, cmd);
+}
+
 /****************************** BEESIGN SOURCE END ****************************************/
 
 void beesignInit(void) {
@@ -458,9 +461,15 @@ void beesignInit(void) {
       bsDevice.vtx.channel = 0;
       bsDevice.vtx.power = 1;
 #ifdef RX_DSMX_2048
+      bsDevice.osd.fmodePosition = 0;
+      bsDevice.osd.ftimePosition = 0;
+      bsDevice.osd.vtxPosition = 0;
       bsDevice.osd.voltagePosition = 3;
       bsDevice.osd.rssiPosition = 0;
 #else
+      bsDevice.osd.fmodePosition = 1;
+      bsDevice.osd.ftimePosition = 2;
+      bsDevice.osd.vtxPosition = 3;
       bsDevice.osd.voltagePosition = 28;
       bsDevice.osd.rssiPosition = 30;
 #endif
@@ -471,7 +480,14 @@ void beesignInit(void) {
    }
    bsSetOsdMode(BEESIGN_OSD_MODE_MINI, BEESIGN_CMD_SEND);
    delay(50000);
-   bsSetMiniLayout(bsDevice.osd.voltagePosition, bsDevice.osd.rssiPosition, bsDevice.osd.namePosition, 0, 0, 0, 0, BEESIGN_CMD_SEND);
+   bsSetMiniLayout(bsDevice.osd.voltagePosition,
+                   bsDevice.osd.rssiPosition,
+                   bsDevice.osd.namePosition,
+                   0,
+                   bsDevice.osd.fmodePosition,
+                   bsDevice.osd.ftimePosition,
+                   bsDevice.osd.vtxPosition,
+                   BEESIGN_CMD_SEND);
    delay(50000);
    bsSetName(bsDevice.others.name, 8, BEESIGN_CMD_SEND);
    delay(50000);
@@ -483,6 +499,8 @@ void beesignInit(void) {
    delay(50000);
    bsSetBandAndChannel(bsDevice.vtx.channel / 8 + 1, bsDevice.vtx.channel % 8 + 1, BEESIGN_CMD_SEND);
    delay(50000);
+   bsSetVTxUnlock(BEESIGN_CMD_SEND);
+   delay(50000);
    bsSaveSetting(BEESIGN_CMD_SEND);
    delay(50000);
 }
@@ -490,6 +508,8 @@ void beesignInit(void) {
 void beesignTask(void) {
    static uint16_t taskCountTime = 0;
    static uint8_t beesignCmdCountTime;
+   static uint8_t armed = 0;
+
    taskCountTime++;
    beesignCmdCountTime++;
    if (beesignCmdCountTime >= 50) {
@@ -506,6 +526,15 @@ void beesignTask(void) {
          rssi = 99;
       }
       bsSetRssi(rssi, BEESIGN_CMD_ADD_BUFF);
+
+      if (getAuxCommand(rcCmdArm) && armed == 0) {
+         armed = 1;
+         bsSetArmed(armed, BEESIGN_CMD_ADD_BUFF);
+      } else if (!getAuxCommand(rcCmdArm) && armed == 1) {
+         armed = 0;
+         bsSetArmed(armed, BEESIGN_CMD_ADD_BUFF);
+      }
    }
 }
+
 #endif
