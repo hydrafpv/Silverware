@@ -243,8 +243,14 @@ void checkrx() {
       channels[5] = ((data[7] >> 7 | data[8] << 1 | data[9] << 9) & 0x07FF);
       channels[6] = ((data[9] >> 2 | data[10] << 6) & 0x07FF);
       channels[7] = ((data[10] >> 5 | data[11] << 3) & 0x07FF);
-      channels[8] = ((data[12] | data[13] << 8) & 0x07FF);
-
+   
+// D16 RX puts RSSI on channel 16 (FrSky XM/XM+)
+#ifdef RX_SBUS_RSSI_16
+         channels[8] = ((data[21] >> 5 | data[22] << 3) & 0x07FF);
+#else
+         channels[8] = ((data[12] | data[13] << 8) & 0x07FF);   
+#endif
+      
       if (rx_state == 0) {
          // wait for valid sbus signal
          static int frame_count = 0;

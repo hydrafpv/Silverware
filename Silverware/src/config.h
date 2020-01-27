@@ -140,6 +140,9 @@
 //#define RX_BAYANG_BLE_APP
 //#define RX_BAYANG_PROTOCOL_TELEMETRY_AUTOBIND
 
+// ************* Select if your SBUS RX places RSSI on channel 16 instead of 8
+#define RX_SBUS_RSSI_16
+
 // *************Transmitter Type Selection
 //#define USE_STOCK_TX
 //#define USE_DEVO
