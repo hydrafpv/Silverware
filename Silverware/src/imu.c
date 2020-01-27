@@ -156,7 +156,10 @@ void imu_calc(void) {
       // hit accel[3] with a sledgehammer
       float filtcoeff = lpfcalc_hz(looptime, 1.0f / (float)PREFILTER);
       for (int x = 0; x < 3; x++) {
-         lpf(&accel[x], accel[x], filtcoeff);
+         //lpf(&accel[x], accel[x], filtcoeff);
+         static float accel_filt[3];
+         lpf(&accel_filt[x], accel[x], filtcoeff);
+         accel[x] = accel_filt[x];
       }
 #endif
    }
