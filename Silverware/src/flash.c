@@ -284,6 +284,11 @@ void flash_load(void) {
       bsDevice.osd.fmodePosition = beesign_temp >> 16;
       bsDevice.osd.ftimePosition = beesign_temp >> 8;
       bsDevice.osd.vtxPosition = beesign_temp;
+      // This flash space on first load is filled with junk. Set to 0.
+      if (bsDevice.osd.currentPosition > 30) { bsDevice.osd.currentPosition = 0; }
+      if (bsDevice.osd.fmodePosition > 30) { bsDevice.osd.fmodePosition = 0; }
+      if (bsDevice.osd.ftimePosition > 30) { bsDevice.osd.ftimePosition = 0; }
+      if (bsDevice.osd.vtxPosition > 30) { bsDevice.osd.vtxPosition = 0; }
 
 #endif
 

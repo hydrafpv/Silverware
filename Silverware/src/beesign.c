@@ -451,6 +451,10 @@ void bsSetArmed(uint8_t value, uint8_t cmd) {
    beesignSend(BEESIGN_M_SET_ARM_STATUS, 1, &value, cmd);
 }
 
+void bsSetFlyMode(uint8_t value, uint8_t cmd) {
+   beesignSend(BEESIGN_M_SET_FLY_MODE, 1, &value, cmd);
+}
+
 /****************************** BEESIGN SOURCE END ****************************************/
 
 void beesignInit(void) {
@@ -467,9 +471,9 @@ void beesignInit(void) {
       bsDevice.osd.voltagePosition = 3;
       bsDevice.osd.rssiPosition = 0;
 #else
-      bsDevice.osd.fmodePosition = 1;
-      bsDevice.osd.ftimePosition = 2;
-      bsDevice.osd.vtxPosition = 3;
+      bsDevice.osd.fmodePosition = 2;
+      bsDevice.osd.ftimePosition = 3;
+      bsDevice.osd.vtxPosition = 1;
       bsDevice.osd.voltagePosition = 28;
       bsDevice.osd.rssiPosition = 30;
 #endif
@@ -508,7 +512,9 @@ void beesignInit(void) {
 void beesignTask(void) {
    static uint16_t taskCountTime = 0;
    static uint8_t beesignCmdCountTime;
-   static uint8_t armed = 0;
+   static uint8_t armed = 1;
+   static uint8_t fcMode = 0x00;
+
 
    taskCountTime++;
    beesignCmdCountTime++;
@@ -521,6 +527,7 @@ void beesignTask(void) {
       bsSetVol((uint16_t)(BEESIGN_GET_FC_VOLTAGE()), BEESIGN_CMD_ADD_BUFF);
       // clamp to 99: is RSSI comes back as 100, the OSD presents "00" which can be misinterpreted as "no signal"
       // max value of "rx_rssi" is 0x07FF, 2047. The BEESIGN macro divides by "20.47", so a value of "100" is possible.
+      // TODO: Need corrected scalars for the RSSI value when not using a BeeCeiver.
       uint8_t rssi = BEESIGN_GET_FC_RSSI();
       if (rssi > 99) {
          rssi = 99;
@@ -533,6 +540,16 @@ void beesignTask(void) {
       } else if (!getAuxCommand(rcCmdArm) && armed == 1) {
          armed = 0;
          bsSetArmed(armed, BEESIGN_CMD_ADD_BUFF);
+      }
+
+      // Bit 0 to 4: altitude, horizon, race, level, Turtle
+      uint8_t mode = getAuxCommand(rcCmdAlti) |
+                     getAuxCommand(rcCmdHorizon) << 1 |
+                     getAuxCommand(rcCmdRace) << 2 |
+                     getAuxCommand(rcCmdLevel) << 3;
+      if (mode != fcMode) {
+         fcMode = mode;
+         bsSetFlyMode(fcMode, BEESIGN_CMD_ADD_BUFF);
       }
    }
 }
